@@ -12,18 +12,14 @@
  */
 #pragma once
 
-const ll MOD = 1e9 + 7;
-
-struct Matrix {
-	ll n;
-	vector<vi> d;
-	Matrix(ll N) : n(N), d(N, vi(N, 0)) {}
-
-	Matrix operator*(const Matrix& other) const {
-		Matrix res(n);
-		fore(i, 0, n) fore(k, 0, n) fore(j, 0, n)
-			res.d[i][j] = (res.d[i][j] + d[i][k] * other.d[k][j]) % MOD;
-		return res;
+template<class T, int N> struct Matrix {
+	typedef Matrix M;
+	array<array<T, N>, N> d{};
+	M operator*(const M& m) const {
+		M a;
+		rep(i,0,N) rep(j,0,N)
+			rep(k,0,N) a.d[i][k] += d[i][j] * m.d[j][k];
+		return a;
 	}
 
 	// this^p by repeated squaring
