@@ -1,7 +1,7 @@
 // Problem: https://judge.yosupo.jp/problem/log_of_formal_power_series
 // Status: AC
 // Submission: https://judge.yosupo.jp/submission/243666
-#include <bits/stdc++.h>
+#include "../../stdc++.h"
 using namespace std;
 
 #define fst first

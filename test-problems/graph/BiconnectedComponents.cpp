@@ -1,7 +1,7 @@
 // Problem: https://judge.yosupo.jp/problem/biconnected_components
 // Status: AC
 // Submission: https://judge.yosupo.jp/submission/244503
-#include <bits/stdc++.h>
+#include "../../stdc++.h"
 using namespace std;
 #define fst first
 #define snd second

@@ -1,6 +1,6 @@
 // Problem: https://codeforces.com/group/j1UosVRZar/contest/287404/problem/E
 // Status: Accepted
-#include <bits/stdc++.h>
+#include "../../stdc++.h"
 using namespace std;
 
 #define fst first

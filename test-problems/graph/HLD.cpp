@@ -2,7 +2,7 @@
 // Status: AC
 // Submission: https://judge.yosupo.jp/submission/275642
 // Testing usage of normal segment tree (not lazy) for HLD
-#include <bits/stdc++.h>
+#include "../../stdc++.h"
 using namespace std;
 
 #define fst first

@@ -1,6 +1,6 @@
 // Problem: https://www.spoj.com/problems/HORRIBLE/
 // Status: accepted
-#include <bits/stdc++.h>
+#include "../../stdc++.h"
 using namespace std;
 
 #define fst first

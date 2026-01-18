@@ -1,7 +1,7 @@
 // Problem: https://codeforces.com/contest/893/problem/F
 // Status: Accepted
 // Submission:
-#include <bits/stdc++.h>
+#include "../../stdc++.h"
 using namespace std;
 
 #define fst first

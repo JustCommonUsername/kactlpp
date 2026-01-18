@@ -1,7 +1,7 @@
 // Problem: https://www.spoj.com/problems/EC_P/
 // Status: accepted
 
-#include <bits/stdc++.h>
+#include "../../stdc++.h"
 using namespace std;
 #define fst first
 #define snd second

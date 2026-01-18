@@ -1,7 +1,7 @@
 // Problem: https://judge.yosupo.jp/problem/staticrmq
 // Status: AC
 // Submission: https://judge.yosupo.jp/submission/243654
-#include <bits/stdc++.h>
+#include "../../stdc++.h"
 using namespace std;
 
 #define fst first

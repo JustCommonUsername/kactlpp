@@ -2,7 +2,7 @@
 // Status: Accepted
 // Submission: https://codeforces.com/contest/2007/submission/312253506
 // Testing usage of normal segment tree (not lazy) for HLD with values in edges
-#include <bits/stdc++.h>
+#include "../../stdc++.h"
 using namespace std;
 
 #define fst first

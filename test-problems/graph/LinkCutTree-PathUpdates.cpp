@@ -1,7 +1,7 @@
 // Problem: https://judge.yosupo.jp/problem/dynamic_tree_vertex_add_path_sum
 // Status: AC
 // Submission: https://judge.yosupo.jp/submission/246196
-#include <bits/stdc++.h>
+#include "../../stdc++.h"
 using namespace std;
 
 #define fst first

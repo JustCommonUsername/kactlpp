@@ -1,7 +1,7 @@
 // Problem: https://judge.yosupo.jp/problem/polynomial_interpolation
 // Status: AC
 // Submission: https://judge.yosupo.jp/submission/243664
-#include <bits/stdc++.h>
+#include "../../stdc++.h"
 using namespace std;
 
 #define fst first

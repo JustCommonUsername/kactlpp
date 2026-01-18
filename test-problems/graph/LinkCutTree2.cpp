@@ -1,7 +1,7 @@
 // Problem: https://judge.yosupo.jp/problem/dynamic_tree_vertex_set_path_composite
 // Status: AC
 // Submission:
-#include <bits/stdc++.h>
+#include "../../stdc++.h"
 using namespace std;
 
 #define fst first

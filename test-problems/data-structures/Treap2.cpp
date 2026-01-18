@@ -1,7 +1,7 @@
 // Problem: https://judge.yosupo.jp/problem/range_set_range_composite
 // Status: TLE
 // Submission:
-#include <bits/stdc++.h>
+#include "../../stdc++.h"
 using namespace std;
 
 #pragma GCC optimize("O3")

@@ -1,6 +1,6 @@
 // Problem: https://open.kattis.com/problems/birthdayboy
 // Status: Accepted
-#include <bits/stdc++.h>
+#include "../../stdc++.h"
 using namespace std;
 
 #define fst first

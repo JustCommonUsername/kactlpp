@@ -1,6 +1,6 @@
 // Problem: https://www.spoj.com/problems/MATSUM/
 // Status: accepted
-#include <bits/stdc++.h>
+#include "../../stdc++.h"
 using namespace std;
 
 #define fst first
