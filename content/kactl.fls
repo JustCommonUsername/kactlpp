@@ -1,0 +1,12 @@
+PWD c:\Users\Alfredo Martins\Desktop\RUB\nwerc\kactlpp\content
+INPUT C:\Users\Alfredo Martins\AppData\Local\MiKTeX\miktex\data\le\pdftex\pdflatex.fmt
+INPUT c:\Users\Alfredo Martins\Desktop\RUB\nwerc\kactlpp\content\kactl.tex
+OUTPUT kactl.log
+INPUT C:\Users\Alfredo Martins\AppData\Local\Programs\MiKTeX\tex\latex\extsizes\extreport.cls
+INPUT C:\Users\Alfredo Martins\AppData\Local\Programs\MiKTeX\tex\latex\extsizes\extreport.cls
+INPUT C:\Users\Alfredo Martins\AppData\Local\Programs\MiKTeX\tex\latex\extsizes\size9.clo
+INPUT C:\Users\Alfredo Martins\AppData\Local\Programs\MiKTeX\tex\latex\extsizes\size9.clo
+INPUT C:\Users\Alfredo Martins\AppData\Local\Programs\MiKTeX\tex\latex\extsizes\size9.clo
+INPUT C:\Users\Alfredo Martins\AppData\Local\Programs\MiKTeX\fonts\tfm\public\cm\cmr9.tfm
+INPUT C:\Users\Alfredo Martins\AppData\Local\Programs\MiKTeX\tex\latex\base\exscale.sty
+INPUT C:\Users\Alfredo Martins\AppData\Local\Programs\MiKTeX\tex\latex\base\exscale.sty
