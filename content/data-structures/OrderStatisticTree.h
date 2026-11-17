@@ -2,27 +2,25 @@
  * Author: Simon Lindholm
  * Date: 2016-03-22
  * License: CC0
- * Source: hacKIT, NWERC 2015
- * Description: A set (not multiset!) with support for finding the n'th
- * element, and finding the index of an element.
- * To get a map, change \texttt{null\_type}.
+ * Source: hacked from the GNU pb_ds documentation
+ * Description: A \texttt{set} that can also find the $k$-th smallest
+ * element and the number of elements smaller than a value.
+ * Not a multiset! For duplicates store \texttt{pair(value, uniqueId)}.
  * Time: O(\log N)
  */
 #pragma once
 
-#include "ext/pb_ds/assoc_container.hpp" /** keep-include */
+#include <ext/pb_ds/assoc_container.hpp> /** keep-include */
 using namespace __gnu_pbds;
 
 template<class T>
-using Tree = tree<T, null_type, less<T>, rb_tree_tag,
-    tree_order_statistics_node_update>;
+using OrderedSet = tree<T, null_type, less<T>, rb_tree_tag,
+	tree_order_statistics_node_update>;
 
 void example() {
-	Tree<ll> t, t2; t.insert(8);
-	auto it = t.insert(10).fst;
-	assert(it == t.lower_bound(9));
-	assert(t.order_of_key(10) == 1);
-	assert(t.order_of_key(11) == 2);
-	assert(*t.find_by_order(0) == 8);
-	t.join(t2); // assuming T < T2 or T > T2, merge t2 into t
+	OrderedSet<ll> s;
+	s.insert(8), s.insert(10), s.insert(3);
+	assert(*s.find_by_order(0) == 3); // 0-th smallest element
+	assert(s.order_of_key(9) == 2);   // number of elements < 9
+	s.erase(8);
 }

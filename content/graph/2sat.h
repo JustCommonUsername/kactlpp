@@ -1,71 +1,47 @@
 /**
- * Author: Emil Lenngren, Simon Lindholm
+ * Author: Emil Lenngren, Simon Lindholm, rewritten for readability
  * Date: 2011-11-29
  * License: CC0
  * Source: folklore
- * Description: Calculates a valid assignment to boolean variables a, b, c,... to a 2-SAT problem,
- * so that an expression of the type $(a||b)\&\&(!a||c)\&\&(d||!b)\&\&...$
- * becomes true, or reports that it is unsatisfiable.
- * Negated variables are represented by bit-inversions (\texttt{\tilde{}x}).
- * Usage:
- *  TwoSat ts(number of boolean variables);
- *  ts.either(0, \tilde3); // Var 0 is true or var 3 is false
- *  ts.setValue(2); // Var 2 is true
- *  ts.atMostOne({0,\tilde1,2}); // <= 1 of vars 0, \tilde1 and 2 are true
- *  ts.solve(); // Returns true iff it is solvable
- *  ts.values[0..N-1] holds the assigned values to the vars
- * Time: O(N+E), where N is the number of boolean variables, and E is the number of clauses.
- * Status: stress-tested
+ * Description: 2-SAT: find values for boolean variables such that a
+ * conjunction of clauses $(a \lor b)$ is true. Literal \texttt{2x} is
+ * "x is true", \texttt{2x+1} is "x is false" (use \texttt{TRUE(x)}, \texttt{FALSE(x)}).
+ * Clause $a \lor b$ adds implications $\lnot a \to b$ and $\lnot b \to a$.
+ * Unsatisfiable iff x and $\lnot$x are in the same SCC.
+ * Usage: TwoSat ts(n); ts.addOr(TRUE(0), FALSE(3)); if (ts.solve()) ts.value[0];
+ * Time: O(N + M) for N variables and M clauses.
  */
 #pragma once
 
+#include "SCC.h"
+
+ll TRUE(ll x) { return 2 * x; }
+ll FALSE(ll x) { return 2 * x + 1; }
+
 struct TwoSat {
-	ll N;
-	vector<vi> gr;
-	vi values; // 0 = false, 1 = true
+	ll n;
+	vector<vi> adj; // implication graph on 2n literals
+	vector<bool> value;
+	TwoSat(ll N) : n(N), adj(2 * N) {}
 
-	TwoSat(ll n = 0) : N(n), gr(2*n) {}
-
-	ll addVar() { // (optional)
-		gr.pb({}), gr.pb({});
-		return N++;
+	// a or b (a, b are literals); lit ^ 1 is the negation
+	void addOr(ll a, ll b) {
+		adj[a ^ 1].pb(b);
+		adj[b ^ 1].pb(a);
 	}
-
-	void either(ll f, ll j) {
-		f = max(2*f, -1-2*f), j = max(2*j, -1-2*j);
-		gr[f].pb(j^1), gr[j].pb(f^1);
-	}
-	void setValue(ll x) { either(x, x); }
-
-	void atMostOne(const vi& li) { // (optional)
-		if (SZ(li) <= 1) return;
-		ll cur = ~li[0];
-		fore(i, 2, SZ(li)) {
-			ll next = addVar();
-			either(cur, ~li[i]);
-			either(cur, next);
-			either(~li[i], next);
-			cur = ~next;
-		}
-		either(cur, ~li[1]);
-	}
-
-	vi val, comp, z; ll time = 0;
-	ll dfs(ll i) {
-		ll low = val[i] = ++time, x; z.pb(i);
-		for (ll e : gr[i]) if (!comp[e])
-			low = min(low, val[e] ?: dfs(e));
-		if (low == val[i]) do {
-			comp[x = z.back()] = low, z.pop_back();
-			if (values[x>>1] == -1) values[x>>1] = x&1;
-		} while (x != i);
-		return val[i] = low;
-	}
+	void setTrue(ll a) { addOr(a, a); }
+	void addImplies(ll a, ll b) { addOr(a ^ 1, b); }
+	void addXor(ll a, ll b) { addOr(a, b), addOr(a ^ 1, b ^ 1); }
 
 	bool solve() {
-		values.assign(N, -1), val.assign(2*N, 0), comp = val;
-		fore(i, 0, 2*N) if (!comp[i]) dfs(i);
-		fore(i, 0, N) if (comp[2*i] == comp[2*i+1]) return 0;
-		return 1;
+		scc(adj);
+		value.assign(n, false);
+		fore(x, 0, n) {
+			if (comp[2 * x] == comp[2 * x + 1]) return false;
+			// Tarjan numbers SCCs in reverse topological order:
+			// pick the literal that comes later in topological order
+			value[x] = comp[2 * x] < comp[2 * x + 1];
+		}
+		return true;
 	}
 };

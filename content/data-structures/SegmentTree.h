@@ -1,31 +1,41 @@
 /**
- * Author: Lucian Bicsi
- * Date: 2017-10-31
+ * Author: Lukas Polacek, rewritten for readability
+ * Date: 2009-10-30
  * License: CC0
  * Source: folklore
- * Description: Zero-indexed max-tree. Bounds are inclusive to the left and exclusive to the right.
- * Can be changed by modifying T, f and neut.
+ * Description: Iterative segment tree, point update and range query.
+ * Change \texttt{neutral} and \texttt{combine} for other operations
+ * (sum: 0 and a+b, min: LLONG\_MAX and min(a,b), gcd: 0 and gcd(a,b)).
+ * Indices are 0-based, query is on $[l, r)$.
+ * Usage: SegmentTree st(n); st.update(3, 7); st.query(0, n);
  * Time: O(\log N)
- * Status: stress-tested
  */
 #pragma once
 
-struct Tree {
-	typedef ll T;
-	static constexpr T neut = LONG_LONG_MIN;
-	T f(T a, T b) { return max(a, b); } // (any associative fn)
-	vector<T> s; ll n;
-	Tree(ll n = 0, T def = neut) : s(2*n, def), n(n) {}
-	void upd(ll pos, T val) {
-		for (s[pos += n] = val; pos /= 2;)
-			s[pos] = f(s[pos * 2], s[pos * 2 + 1]);
+struct SegmentTree {
+	// tree[n + i] = a[i], tree[v] = combine(tree[2v], tree[2v+1])
+	const ll neutral = LLONG_MIN;
+	ll combine(ll a, ll b) { return max(a, b); }
+
+	ll n;
+	vi tree;
+	SegmentTree(ll N) : n(N), tree(2 * N, neutral) {}
+
+	// a[pos] = value
+	void update(ll pos, ll value) {
+		pos += n;
+		tree[pos] = value;
+		for (pos /= 2; pos >= 1; pos /= 2)
+			tree[pos] = combine(tree[2 * pos], tree[2 * pos + 1]);
 	}
-	T query(ll b, ll e) { // query [b, e)
-		T ra = neut, rb = neut;
-		for (b += n, e += n; b < e; b /= 2, e /= 2) {
-			if (b % 2) ra = f(ra, s[b++]);
-			if (e % 2) rb = f(s[--e], rb);
+
+	// combine of a[l], ..., a[r - 1]
+	ll query(ll l, ll r) {
+		ll resLeft = neutral, resRight = neutral;
+		for (l += n, r += n; l < r; l /= 2, r /= 2) {
+			if (l % 2 == 1) resLeft = combine(resLeft, tree[l++]);
+			if (r % 2 == 1) resRight = combine(tree[--r], resRight);
 		}
-		return f(ra, rb);
+		return combine(resLeft, resRight);
 	}
 };

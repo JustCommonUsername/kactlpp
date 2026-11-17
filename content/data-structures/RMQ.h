@@ -1,31 +1,32 @@
 /**
- * Author: Johan Sannemo, pajenegod
+ * Author: Johan Sannemo, pajenegod, rewritten for readability
  * Date: 2015-02-06
  * License: CC0
  * Source: Folklore
- * Description: Range Minimum Queries on an array. Returns
- * min(V[a], V[a + 1], ... V[b - 1]) in constant time.
- * Usage:
- *  RMQ rmq(values);
- *  rmq.query(inclusive, exclusive);
- * Time: $O(|V| \log |V| + Q)$
- * Status: stress-tested
+ * Description: Sparse table for range minimum queries on a static
+ * array. Works for any idempotent operation (min, max, gcd, and, or).
+ * Usage: SparseTable st(a); st.query(l, r); // min of a[l..r-1]
+ * Time: $O(N \log N)$ build, $O(1)$ query.
  */
 #pragma once
 
-template<class T>
-struct RMQ {
-	vector<vector<T>> jmp;
-	RMQ(const vector<T>& V) : jmp(1, V) {
-		for (ll pw = 1, k = 1; pw * 2 <= SZ(V); pw *= 2, ++k) {
-			jmp.emplace_back(SZ(V) - pw * 2 + 1);
-			fore(j,0,SZ(jmp[k]))
-				jmp[k][j] = min(jmp[k - 1][j], jmp[k - 1][j + pw]);
+struct SparseTable {
+	// table[k][i] = min of a[i .. i + 2^k - 1]
+	vector<vi> table;
+	SparseTable(vi& a) {
+		ll n = SZ(a);
+		table.pb(a);
+		for (ll k = 1; (1LL << k) <= n; k++) {
+			ll half = 1LL << (k - 1);
+			table.pb(vi(n - (1LL << k) + 1));
+			fore(i, 0, SZ(table[k]))
+				table[k][i] = min(table[k-1][i], table[k-1][i + half]);
 		}
 	}
-	T query(ll a, ll b) {
-		assert(a < b); // or return inf if a == b
-		ll dep = 63 - __builtin_clzll(b - a);
-		return min(jmp[dep][a], jmp[dep][b - (1 << dep)]);
+
+	// min of a[l .. r - 1], requires l < r
+	ll query(ll l, ll r) {
+		ll k = __lg(r - l);
+		return min(table[k][l], table[k][r - (1LL << k)]);
 	}
 };

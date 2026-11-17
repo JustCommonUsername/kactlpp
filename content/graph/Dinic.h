@@ -1,53 +1,73 @@
 /**
- * Author: chilli
+ * Author: chilli, rewritten for readability
  * Date: 2019-04-26
  * License: CC0
  * Source: https://cp-algorithms.com/graph/dinic.html
- * Description: Flow algorithm with complexity $O(VE\log U)$ where $U = \max |\text{cap}|$.
- * $O(\min(E^{1/2}, V^{2/3})E)$ if $U = 1$; $O(\sqrt{V}E)$ for bipartite matching.
- * Status: Tested on SPOJ FASTFLOW and SPOJ MATCHING, stress-tested
+ * Description: Maximum flow / minimum cut with Dinic's algorithm.
+ * After \texttt{maxFlow(s, t)}, the nodes with \texttt{level[u] != 0}
+ * are on the source side of a minimum cut.
+ * Bipartite matching: source -> left (cap 1), left -> right (cap 1),
+ * right -> sink (cap 1).
+ * Usage: Dinic flow(n); flow.addEdge(u, v, cap); ll f = flow.maxFlow(s, t);
+ * Time: $O(V^2 E)$, $O(E \sqrt V)$ for bipartite matching.
  */
 #pragma once
 
 struct Dinic {
-	struct Edge {
-		ll to, rev;
-		ll c, oc;
-		ll flow() { return max(oc - c, 0LL); } // if you need flows
-	};
-	vi lvl, ptr, q;
+	// edge u -> to with remaining capacity cap; adj[to][rev] is
+	// the reverse edge (used to undo flow)
+	struct Edge { ll to, rev, cap, originalCap; };
 	vector<vector<Edge>> adj;
-	Dinic(ll n) : lvl(n), ptr(n), q(n), adj(n) {}
-	void addEdge(ll a, ll b, ll c, ll rcap = 0) {
-		adj[a].pb({b, SZ(adj[b]), c, c});
-		adj[b].pb({a, SZ(adj[a]) - 1, rcap, rcap});
+	vi level, nextEdge;
+	Dinic(ll n) : adj(n), level(n), nextEdge(n) {}
+
+	void addEdge(ll u, ll v, ll cap, ll reverseCap = 0) {
+		adj[u].pb({v, SZ(adj[v]), cap, cap});
+		adj[v].pb({u, SZ(adj[u]) - 1, reverseCap, reverseCap});
 	}
-	ll dfs(ll v, ll t, ll f) {
-		if (v == t || !f) return f;
-		for (ll& i = ptr[v]; i < SZ(adj[v]); i++) {
-			Edge& e = adj[v][i];
-			if (lvl[e.to] == lvl[v] + 1)
-				if (ll p = dfs(e.to, t, min(f, e.c))) {
-					e.c -= p, adj[e.to][e.rev].c += p;
-					return p;
+
+	// BFS: level[u] = distance from s using edges with cap > 0
+	bool buildLevels(ll s, ll t) {
+		fill(ALL(level), 0);
+		level[s] = 1;
+		queue<ll> q;
+		q.push(s);
+		while (!q.empty()) {
+			ll u = q.front(); q.pop();
+			for (auto& e : adj[u])
+				if (e.cap > 0 && level[e.to] == 0) {
+					level[e.to] = level[u] + 1;
+					q.push(e.to);
 				}
+		}
+		return level[t] != 0;
+	}
+
+	// DFS: push flow along edges that go one level deeper
+	ll pushFlow(ll u, ll t, ll flow) {
+		if (u == t) return flow;
+		for (ll& i = nextEdge[u]; i < SZ(adj[u]); i++) {
+			Edge& e = adj[u][i];
+			if (e.cap > 0 && level[e.to] == level[u] + 1) {
+				ll pushed = pushFlow(e.to, t, min(flow, e.cap));
+				if (pushed > 0) {
+					e.cap -= pushed;
+					adj[e.to][e.rev].cap += pushed;
+					return pushed;
+				}
+			}
 		}
 		return 0;
 	}
-	ll calc(ll s, ll t) {
-		ll flow = 0; q[0] = s;
-		fore(L,0,31) do { // 'll L=30' maybe faster for random data
-			lvl = ptr = vi(SZ(q));
-			ll qi = 0, qe = lvl[s] = 1;
-			while (qi < qe && !lvl[t]) {
-				ll v = q[qi++];
-				for (Edge e : adj[v])
-					if (!lvl[e.to] && e.c >> (30 - L))
-						q[qe++] = e.to, lvl[e.to] = lvl[v] + 1;
-			}
-			while (ll p = dfs(s, t, LLONG_MAX)) flow += p;
-		} while (lvl[t]);
-		return flow;
+
+	ll maxFlow(ll s, ll t) {
+		ll total = 0;
+		while (buildLevels(s, t)) {
+			fill(ALL(nextEdge), 0);
+			while (ll pushed = pushFlow(s, t, LLONG_MAX)) total += pushed;
+		}
+		return total;
 	}
-	bool leftOfMinCut(ll a) { return lvl[a] != 0; }
+
+	// flow on edge e = e.originalCap - e.cap (if positive)
 };

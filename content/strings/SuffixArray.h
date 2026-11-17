@@ -1,41 +1,42 @@
 /**
- * Author: 罗穗骞, chilli
- * Date: 2019-04-11
- * License: Unknown
- * Source: Suffix array - a powerful tool for dealing with strings
- * (Chinese IOI National team training paper, 2009)
- * Description: Builds suffix array for a string.
- * \texttt{sa[i]} is the starting index of the suffix which
- * is $i$'th in the sorted suffix array.
- * The returned vector is of size $n+1$, and \texttt{sa[0] = n}.
- * The \texttt{lcp} array contains longest common prefixes for
- * neighbouring strings in the suffix array:
- * \texttt{lcp[i] = lcp(sa[i], sa[i-1])}, \texttt{lcp[0] = 0}.
- * \texttt{rank} is the inverse of the suffix array:
- * \texttt{rank[sa[i]] = i}.
- * \texttt{lim} should be strictly larger than all elements.
- * For larger alphabets use \texttt{basic\_string<ll>} instead
- * of \texttt{string}.
- * The input string must not contain any zero bytes.
- * Time: O(n \log n)
- * Status: stress-tested
+ * Author: folklore, rewritten for readability
+ * Date: 2026-11-17
+ * License: CC0
+ * Source: https://cp-algorithms.com/string/suffix-array.html
+ * Description: \texttt{sa[i]} = start of the i-th smallest suffix of s.
+ * \texttt{lcp[i]} = longest common prefix of the suffixes \texttt{sa[i]} and
+ * \texttt{sa[i+1]} (Kasai). Number of distinct substrings:
+ * $n(n+1)/2 - \sum lcp$. Longest repeated substring: $\max lcp$.
+ * Usage: SuffixArray sa(s); sa.sa[0]; sa.lcp[0];
+ * Time: $O(n \log^2 n)$ build (sort by pairs of ranks), $O(n)$ LCP.
  */
 #pragma once
 
-array<vi, 3> suffixArray(string& s, ll lim = 'z' + 1) {
-	ll n = SZ(s) + 1, k = 0, a, b;
-	vi rank(ALL(s)+1), y(n), ws(max(n,lim)), sa(n), lcp(n);
-	iota(ALL(sa), 0);
-	for (ll j = 0, p = 0; p < n; j = max(1ll, j * 2), lim = p) {
-		p = j, iota(ALL(y), n - j), fill(ALL(ws), 0);
-		fore(i,0,n) if (ws[rank[i]]++, sa[i]>=j) y[p++] = sa[i]-j;
-		fore(i, 1, lim) ws[i] += ws[i - 1];
-		for (ll i = n; i--;) sa[--ws[rank[y[i]]]] = y[i];
-		swap(rank, y), p = 1, rank[sa[0]] = 0;
-		fore(i, 1, n) a = sa[i - 1], b = sa[i], rank[b] =
-			(y[a] == y[b] && y[a + j] == y[b + j]) ? p - 1 : p++;
+struct SuffixArray {
+	ll n;
+	vi sa, rnk, lcp;
+	SuffixArray(const string& s) : n(SZ(s)), sa(n), rnk(n), lcp(max(n - 1, 0LL)) {
+		fore(i, 0, n) sa[i] = i, rnk[i] = s[i];
+		// sort by the first 2k characters using ranks of the first k
+		for (ll k = 1; n > 0; k *= 2) {
+			auto key = [&](ll i) {
+				return ii(rnk[i], i + k < n ? rnk[i + k] : -1);
+			};
+			sort(ALL(sa), [&](ll a, ll b) { return key(a) < key(b); });
+			vi newRank(n, 0);
+			fore(i, 1, n)
+				newRank[sa[i]] = newRank[sa[i-1]] + (key(sa[i-1]) < key(sa[i]));
+			rnk = newRank;
+			if (rnk[sa[n - 1]] == n - 1 || k >= n) break;
+		}
+		// Kasai: lcp decreases by at most 1 when moving to the next suffix
+		ll h = 0;
+		fore(i, 0, n) {
+			if (rnk[i] == n - 1) { h = 0; continue; }
+			ll j = sa[rnk[i] + 1];
+			while (i + h < n && j + h < n && s[i + h] == s[j + h]) h++;
+			lcp[rnk[i]] = h;
+			if (h > 0) h--;
+		}
 	}
-	for(ll i = 0, j; i < n - 1; lcp[rank[i++]] = k)
-		for(k && k--, j = sa[rank[i] - 1]; s[i+k] == s[j+k]; k++);
-	return {sa, lcp, rank};
-}
+};

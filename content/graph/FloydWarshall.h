@@ -1,26 +1,27 @@
 /**
- * Author: Simon Lindholm
+ * Author: Simon Lindholm, rewritten for readability
  * Date: 2016-12-15
  * License: CC0
- * Source: http://en.wikipedia.org/wiki/Floyd–Warshall_algorithm
- * Description: Calculates all-pairs shortest path in a directed graph that might have negative edge weights.
- * Input is an distance matrix $m$, where $m[i][j] = \texttt{inf}$ if $i$ and $j$ are not adjacent.
- * As output, $m[i][j]$ is set to the shortest distance between $i$ and $j$, \texttt{inf} if no path,
- * or \texttt{-inf} if the path goes through a negative-weight cycle.
+ * Source: http://en.wikipedia.org/wiki/Floyd-Warshall_algorithm
+ * Description: All-pairs shortest paths. Input: \texttt{dist[i][j]} =
+ * weight of edge i -> j, or \texttt{INF} if there is none. Afterwards
+ * \texttt{dist[i][j]} is the shortest distance, \texttt{INF} if there is no
+ * path and \texttt{-INF} if the path can use a negative cycle.
  * Time: O(N^3)
- * Status: slightly tested
  */
 #pragma once
 
-const ll inf = 1LL << 62;
-void floydWarshall(vector<vi>& m) {
-	ll n = SZ(m);
-	fore(i,0,n) m[i][i] = min(m[i][i], 0LL);
-	fore(k,0,n) fore(i,0,n) fore(j,0,n)
-		if (m[i][k] != inf && m[k][j] != inf) {
-			auto newDist = max(m[i][k] + m[k][j], -inf);
-			m[i][j] = min(m[i][j], newDist);
-		}
-	fore(k,0,n) if (m[k][k] < 0) fore(i,0,n) fore(j,0,n)
-		if (m[i][k] != inf && m[k][j] != inf) m[i][j] = -inf;
+const ll INF = LLONG_MAX / 4;
+
+void floydWarshall(vector<vi>& dist) {
+	ll n = SZ(dist);
+	fore(i, 0, n) dist[i][i] = min(dist[i][i], 0LL);
+	// k = intermediate node that paths may now use
+	fore(k, 0, n) fore(i, 0, n) fore(j, 0, n)
+		if (dist[i][k] != INF && dist[k][j] != INF)
+			dist[i][j] = min(dist[i][j], max(dist[i][k] + dist[k][j], -INF));
+	// a node k with dist[k][k] < 0 lies on a negative cycle
+	fore(k, 0, n) if (dist[k][k] < 0)
+		fore(i, 0, n) fore(j, 0, n)
+			if (dist[i][k] != INF && dist[k][j] != INF) dist[i][j] = -INF;
 }

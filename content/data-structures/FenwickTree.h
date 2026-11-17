@@ -1,34 +1,35 @@
 /**
- * Author: Lukas Polacek
+ * Author: Lukas Polacek, rewritten for readability
  * Date: 2009-10-30
  * License: CC0
  * Source: folklore/TopCoder
- * Description: Computes partial sums a[0] + a[1] + ... + a[pos - 1], and updates single elements a[i],
- * taking the difference between the old and new value.
- * Time: Both operations are $O(\log N)$.
- * Status: Stress-tested
+ * Description: Fenwick tree (binary indexed tree). Point add and
+ * prefix sum. Internally 1-based, the interface is 0-based.
+ * For range add + point query: \texttt{add(l, x), add(r, -x)}
+ * and the value at $i$ is \texttt{prefixSum(i + 1)}.
+ * Usage: FenwickTree ft(n); ft.add(i, 5); ft.rangeSum(l, r);
+ * Time: O(\log N) per operation.
  */
 #pragma once
 
-struct FT {
-	vi s;
-	FT(ll n) : s(n) {}
-	void upd(ll pos, ll dif) { // a[pos] += dif
-		for (; pos < SZ(s); pos |= pos + 1) s[pos] += dif;
+struct FenwickTree {
+	// bit[i] = sum of a[i - lowbit(i) + 1 .. i] (1-based)
+	ll n;
+	vi bit;
+	FenwickTree(ll N) : n(N), bit(N + 1, 0) {}
+
+	// a[pos] += delta
+	void add(ll pos, ll delta) {
+		for (pos++; pos <= n; pos += pos & -pos) bit[pos] += delta;
 	}
-	ll query(ll pos) { // sum of values in [0, pos)
+
+	// a[0] + ... + a[r - 1]
+	ll prefixSum(ll r) {
 		ll res = 0;
-		for (; pos > 0; pos &= pos - 1) res += s[pos-1];
+		for (; r > 0; r -= r & -r) res += bit[r];
 		return res;
 	}
-	ll lower_bound(ll sum) {// min pos st sum of [0, pos] >= sum
-		// Returns n if no sum is >= sum, or -1 if empty sum is.
-		if (sum <= 0) return -1;
-		ll pos = 0;
-		for (ll pw = 1 << 25; pw; pw >>= 1) {
-			if (pos + pw <= SZ(s) && s[pos + pw-1] < sum)
-				pos += pw, sum -= s[pos-1];
-		}
-		return pos;
-	}
+
+	// a[l] + ... + a[r - 1]
+	ll rangeSum(ll l, ll r) { return prefixSum(r) - prefixSum(l); }
 };

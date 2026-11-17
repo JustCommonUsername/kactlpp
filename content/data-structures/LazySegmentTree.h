@@ -1,70 +1,74 @@
 /**
- * Author: Iván Renison
- * Date: 2024-03-05
+ * Author: Simon Lindholm, rewritten for readability
+ * Date: 2016-10-08
  * License: CC0
- * Source: notebook el vasito
- * Description: Segment tree with ability to add values of large intervals, and compute the sum of intervals.
- * Ranges are [s, e).
- * Can be changed to other things.
- * Time: O(\log N).
- * Usage: Tree st(n);
- *  st.init(x);
- *  st.upd(s, e, v);
- *  st.query(s, e);
- * Status: Tested on SPOJ HORRIBLE, stress-tested a bit
+ * Source: me
+ * Description: Segment tree with range add and range sum.
+ * For range min/max with range add: \texttt{combine} = min/max,
+ * \texttt{neutral} = $\pm$inf and in \texttt{apply} do not multiply by the length.
+ * For range assignment, store the assigned value in \texttt{lazy}
+ * and use a flag for "no assignment".
+ * Indices are 0-based, all ranges are $[l, r)$.
+ * Usage: LazySegmentTree st(a); st.update(2, 5, 10); st.query(0, n);
+ * Time: O(\log N) per operation.
  */
 #pragma once
 
-typedef ll T; typedef ll L; // T: data type, L: lazy type
-const T tneut = 0; const L lneut = 0; // neutrals
-T f(T a, T b) { return a + b; } // associative
-T apply(T v, L l, ll s, ll e) { // new st according to lazy
-	return v + l * (e - s); }
-L comb(L a, L b) { return a + b; } // cumulative effect of lazy
+struct LazySegmentTree {
+	// node v covers [lo, hi), children are 2v and 2v+1
+	// sum[v] = real sum of the range of v (lazy[v] already applied)
+	// lazy[v] = value that still has to be added to the children
+	const ll neutral = 0;
+	ll combine(ll a, ll b) { return a + b; }
 
-struct Tree { // example: range sum with range addition
 	ll n;
-	vector<T> st;
-	vector<L> lazy;
-	Tree(ll n) : n(n), st(4*n, tneut), lazy(4*n, lneut) {}
-	Tree(vector<T> &a) : n(SZ(a)), st(4*n), lazy(4*n, lneut) {
-		init(1, 0, n, a);
+	vi sum, lazy;
+	LazySegmentTree(vi& a) : n(SZ(a)), sum(4 * n), lazy(4 * n) {
+		build(1, 0, n, a);
 	}
-	void init(ll k, ll s, ll e, vector<T> &a) {
-		lazy[k] = lneut;
-		if (s + 1 == e) { st[k] = a[s]; return; }
-		ll m = (s + e) / 2;
-		init(2*k, s, m, a), init(2*k+1, m, e, a);
-		st[k] = f(st[2*k], st[2*k+1]);
+
+	void build(ll v, ll lo, ll hi, vi& a) {
+		if (hi - lo == 1) { sum[v] = a[lo]; return; }
+		ll mid = (lo + hi) / 2;
+		build(2 * v, lo, mid, a), build(2 * v + 1, mid, hi, a);
+		sum[v] = combine(sum[2 * v], sum[2 * v + 1]);
 	}
-	void push(ll k, ll s, ll e) {
-		if (lazy[k] == lneut) return; // if neutral, nothing to do
-		st[k] = apply(st[k], lazy[k], s, e);
-		if (s + 1 < e) { // propagate to children
-			lazy[2*k] = comb(lazy[2*k], lazy[k]);
-			lazy[2*k+1] = comb(lazy[2*k+1], lazy[k]);
-		}
-		lazy[k] = lneut; // clear node lazy
+
+	// add x to every element in the range [lo, hi) of node v
+	void apply(ll v, ll lo, ll hi, ll x) {
+		sum[v] += x * (hi - lo);
+		lazy[v] += x;
 	}
-	void upd(ll k, ll s, ll e, ll a, ll b, L v) {
-		push(k, s, e);
-		if (s >= b || e <= a) return;
-		if (s >= a && e <= b) {
-			lazy[k] = comb(lazy[k], v); // accumulate lazy
-			push(k, s, e);
-			return;
-		}
-		ll m = (s + e) / 2;
-		upd(2*k, s, m, a, b, v), upd(2*k+1, m, e, a, b, v);
-		st[k] = f(st[2*k], st[2*k+1]);
+
+	void push(ll v, ll lo, ll hi) {
+		if (lazy[v] == 0) return;
+		ll mid = (lo + hi) / 2;
+		apply(2 * v, lo, mid, lazy[v]);
+		apply(2 * v + 1, mid, hi, lazy[v]);
+		lazy[v] = 0;
 	}
-	T query(ll k, ll s, ll e, ll a, ll b) {
-		if (s >= b || e <= a) return tneut;
-		push(k, s, e);
-		if (s >= a && e <= b) return st[k];
-		ll m = (s + e) / 2;
-		return f(query(2*k, s, m, a, b),query(2*k+1, m, e, a, b));
+
+	void update(ll v, ll lo, ll hi, ll l, ll r, ll x) {
+		if (r <= lo || hi <= l) return;
+		if (l <= lo && hi <= r) { apply(v, lo, hi, x); return; }
+		push(v, lo, hi);
+		ll mid = (lo + hi) / 2;
+		update(2 * v, lo, mid, l, r, x);
+		update(2 * v + 1, mid, hi, l, r, x);
+		sum[v] = combine(sum[2 * v], sum[2 * v + 1]);
 	}
-	void upd(ll a, ll b, L v) { upd(1, 0, n, a, b, v); }
-	T query(ll a, ll b) { return query(1, 0, n, a, b); }
+
+	ll query(ll v, ll lo, ll hi, ll l, ll r) {
+		if (r <= lo || hi <= l) return neutral;
+		if (l <= lo && hi <= r) return sum[v];
+		push(v, lo, hi);
+		ll mid = (lo + hi) / 2;
+		return combine(query(2 * v, lo, mid, l, r),
+		               query(2 * v + 1, mid, hi, l, r));
+	}
+
+	// a[i] += x for all i in [l, r)
+	void update(ll l, ll r, ll x) { update(1, 0, n, l, r, x); }
+	// a[l] + ... + a[r - 1]
+	ll query(ll l, ll r) { return query(1, 0, n, l, r); }
 };

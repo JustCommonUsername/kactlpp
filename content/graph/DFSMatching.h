@@ -1,38 +1,40 @@
 /**
- * Author: Lukas Polacek
+ * Author: Lukas Polacek, rewritten for readability
  * Date: 2009-10-28
  * License: CC0
- * Source:
- * Description: Simple bipartite matching algorithm. Graph $g$ should be a list
- * of neighbors of the left partition, and $btoa$ should be a vector full of
- * -1's of the same size as the right partition. Returns the size of
- * the matching. $btoa[i]$ will be the match for vertex $i$ on the right side,
- * or $-1$ if it's not matched.
- * Time: O(VE)
- * Usage: vi btoa(m, -1); dfsMatching(g, btoa);
- * Status: works
+ * Source: folklore (Kuhn's algorithm)
+ * Description: Maximum bipartite matching. \texttt{adj[l]} lists the
+ * right nodes adjacent to left node \texttt{l}. Afterwards
+ * \texttt{matchRight[r]} is the left partner of \texttt{r} (or -1).
+ * By K\"onig, in bipartite graphs min vertex cover = max matching, and
+ * max independent set = $V$ - max matching.
+ * Usage: ll m = maxMatching(adj, numRight);
+ * Time: O(VE), fast in practice. Use Dinic for big graphs.
  */
 #pragma once
 
-bool find(ll j, vector<vi>& g, vi& btoa, vi& vis) {
-	if (btoa[j] == -1) return 1;
-	vis[j] = 1; ll di = btoa[j];
-	for (ll e : g[di])
-		if (!vis[e] && find(e, g, btoa, vis)) {
-			btoa[e] = di;
-			return 1;
+vi matchRight;
+vector<bool> visited;
+
+// try to find an augmenting path starting at left node l
+bool tryKuhn(ll l, vector<vi>& adj) {
+	for (ll r : adj[l]) {
+		if (visited[r]) continue;
+		visited[r] = true;
+		if (matchRight[r] == -1 || tryKuhn(matchRight[r], adj)) {
+			matchRight[r] = l;
+			return true;
 		}
-	return 0;
-}
-ll dfsMatching(vector<vi>& g, vi& btoa) {
-	vi vis;
-	fore(i,0,SZ(g)) {
-		vis.assign(SZ(btoa), 0);
-		for (ll j : g[i])
-			if (find(j, g, btoa, vis)) {
-				btoa[j] = i;
-				break;
-			}
 	}
-	return SZ(btoa) - (ll)count(ALL(btoa), -1);
+	return false;
+}
+
+ll maxMatching(vector<vi>& adj, ll numRight) {
+	matchRight.assign(numRight, -1);
+	ll size = 0;
+	fore(l, 0, SZ(adj)) {
+		visited.assign(numRight, false);
+		if (tryKuhn(l, adj)) size++;
+	}
+	return size;
 }

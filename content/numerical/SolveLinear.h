@@ -1,49 +1,46 @@
 /**
- * Author: Per Austrin, Simon Lindholm
+ * Author: Per Austrin, Simon Lindholm, rewritten for readability
  * Date: 2004-02-08
  * License: CC0
- * Description: Solves $A * x = b$. If there are multiple solutions, an arbitrary one is returned.
- *  Returns rank, or -1 if no solutions. Data in $A$ and $b$ is lost.
- * Time: O(n^2 m)
- * Status: tested on kattis:equationsolver, and bruteforce-tested mod 3 and 5 for n,m <= 3
+ * Source: https://cp-algorithms.com/linear_algebra/linear-system-gauss.html
+ * Description: Solves $A x = b$ with Gauss-Jordan elimination
+ * ($n$ equations, $m$ unknowns, \texttt{a} is $n \times (m+1)$ with $b$ as the last column).
+ * Returns 0 if there is no solution, 1 if it is unique and 2 if there are
+ * infinitely many (then \texttt{x} is one of them, free variables are 0).
+ * For mod p: replace division by multiplication with the inverse and
+ * compare with 0 instead of EPS. For XOR systems use bitset rows.
+ * Time: O(n m \min(n, m))
  */
 #pragma once
 
-typedef vector<double> vd;
-const double eps = 1e-12;
+const double EPS = 1e-9;
 
-ll solveLinear(vector<vd>& A, vd& b, vd& x) {
-	ll n = SZ(A), m = SZ(x), rank = 0, br, bc;
-	if (n) assert(SZ(A[0]) == m);
-	vi col(m); iota(ALL(col), 0);
-
-	fore(i,0,n) {
-		double v, bv = 0;
-		fore(r,i,n) fore(c,i,m)
-			if ((v = fabs(A[r][c])) > bv)
-				br = r, bc = c, bv = v;
-		if (bv <= eps) {
-			fore(j,i,n) if (fabs(b[j]) > eps) return -1;
-			break;
+ll gauss(vector<vector<double>> a, vector<double>& x) {
+	ll n = SZ(a), m = SZ(a[0]) - 1;
+	vi where(m, -1); // where[col] = row of the pivot of col
+	for (ll col = 0, row = 0; col < m && row < n; col++) {
+		// partial pivoting: largest absolute value in this column
+		ll best = row;
+		fore(i, row, n) if (fabs(a[i][col]) > fabs(a[best][col])) best = i;
+		if (fabs(a[best][col]) < EPS) continue;
+		swap(a[best], a[row]);
+		where[col] = row;
+		// eliminate this column from all other rows
+		fore(i, 0, n) if (i != row) {
+			double factor = a[i][col] / a[row][col];
+			fore(j, col, m + 1) a[i][j] -= a[row][j] * factor;
 		}
-		swap(A[i], A[br]);
-		swap(b[i], b[br]);
-		swap(col[i], col[bc]);
-		fore(j,0,n) swap(A[j][i], A[j][bc]);
-		bv = 1/A[i][i];
-		fore(j,i+1,n) {
-			double fac = A[j][i] * bv;
-			b[j] -= fac * b[i];
-			fore(k,i+1,m) A[j][k] -= fac*A[i][k];
-		}
-		rank++;
+		row++;
 	}
-
 	x.assign(m, 0);
-	for (ll i = rank; i--;) {
-		b[i] /= A[i][i];
-		x[col[i]] = b[i];
-		fore(j,0,i) b[j] -= A[j][i] * b[i];
+	fore(col, 0, m)
+		if (where[col] != -1) x[col] = a[where[col]][m] / a[where[col]][col];
+	// check that every equation holds
+	fore(i, 0, n) {
+		double sum = 0;
+		fore(j, 0, m) sum += x[j] * a[i][j];
+		if (fabs(sum - a[i][m]) > EPS) return 0;
 	}
-	return rank; // (multiple solutions if rank < m)
+	fore(col, 0, m) if (where[col] == -1) return 2;
+	return 1;
 }

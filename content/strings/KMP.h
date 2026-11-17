@@ -1,28 +1,32 @@
 /**
- * Author: Johan Sannemo
+ * Author: Johan Sannemo, rewritten for readability
  * Date: 2016-12-15
  * License: CC0
- * Description: pi[x] computes the length of the longest prefix of s that ends at x,
- * other than s[0...x] itself (abacaba -> 0010123).
- * Can be used to find all occurrences of a string.
+ * Description: Prefix function: \texttt{pi[i]} = length of the longest
+ * proper prefix of \texttt{s[0..i]} that is also a suffix of it
+ * (abacaba -> 0010123). \texttt{findAll} returns all start positions
+ * of \texttt{pattern} in \texttt{text}.
+ * Smallest period of s: $p = n - \pi[n-1]$ (s is a repetition iff $p \mid n$).
  * Time: O(n)
- * Status: Tested on kattis:stringmatching
  */
 #pragma once
 
-vi pi(const string& s) {
-	vi p(SZ(s));
-	fore(i,1,SZ(s)) {
-		ll g = p[i-1];
-		while (g && s[i] != s[g]) g = p[g-1];
-		p[i] = g + (s[i] == s[g]);
+vi prefixFunction(const string& s) {
+	ll n = SZ(s);
+	vi pi(n, 0);
+	fore(i, 1, n) {
+		ll len = pi[i - 1]; // try to extend the previous border
+		while (len > 0 && s[i] != s[len]) len = pi[len - 1];
+		if (s[i] == s[len]) len++;
+		pi[i] = len;
 	}
-	return p;
+	return pi;
 }
 
-vi match(const string& s, const string& pat) {
-	vi p = pi(pat + '\0' + s), res;
-	fore(i,SZ(p)-SZ(s),SZ(p))
-		if (p[i] == SZ(pat)) res.pb(i - 2 * SZ(pat));
+vi findAll(const string& text, const string& pattern) {
+	ll m = SZ(pattern);
+	vi pi = prefixFunction(pattern + '\0' + text), res;
+	fore(i, 2 * m, SZ(pi))
+		if (pi[i] == m) res.pb(i - 2 * m);
 	return res;
 }

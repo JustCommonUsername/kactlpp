@@ -1,23 +1,27 @@
 /**
- * Author: User adamant on CodeForces
+ * Author: User adamant on CodeForces, rewritten for readability
  * Source: http://codeforces.com/blog/entry/12143
- * Description: For each position in a string, computes p[0][i] = half length of
- *  longest even palindrome around pos i, p[1][i] = longest odd (half rounded down).
+ * Description: Palindromes. Builds \texttt{t = \#s0\#s1\#...\#} and returns
+ * \texttt{rad[i]} = radius of the longest palindrome in \texttt{t} centered at i.
+ * The palindrome of \texttt{s} centered there has length \texttt{rad[i] - 1}
+ * and starts at \texttt{(i - rad[i] + 1) / 2}.
  * Time: O(N)
- * Status: Stress-tested
  */
 #pragma once
 
-array<vi, 2> manacher(const string& s) {
-	ll n = SZ(s);
-	array<vi,2> p = {vi(n+1), vi(n)};
-	fore(z,0,2) for (ll i=0,l=0,r=0; i < n; i++) {
-		ll t = r-i+!z;
-		if (i<r) p[z][i] = min(t, p[z][l+t]);
-		ll L = i-p[z][i], R = i+p[z][i]-!z;
-		while (L>=1 && R+1<n && s[L-1] == s[R+1])
-			p[z][i]++, L--, R++;
-		if (R>r) l=L, r=R;
+vi manacher(const string& s) {
+	string t = "#";
+	for (char c : s) t += c, t += '#';
+	ll n = SZ(t);
+	vi rad(n, 0);
+	// [l, r) = palindrome that reaches the furthest to the right
+	ll l = 0, r = 0;
+	fore(i, 0, n) {
+		if (i < r) rad[i] = min(r - i, rad[l + r - 1 - i]);
+		while (i - rad[i] >= 0 && i + rad[i] < n &&
+		       t[i - rad[i]] == t[i + rad[i]])
+			rad[i]++;
+		if (i + rad[i] > r) l = i - rad[i] + 1, r = i + rad[i];
 	}
-	return p;
+	return rad;
 }

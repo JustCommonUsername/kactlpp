@@ -1,19 +1,20 @@
 /**
- * Author: Simon Lindholm
+ * Author: Simon Lindholm, rewritten for readability
  * Date: 2015-02-11
  * License: CC0
  * Source: Wikipedia
- * Description: Simple integration of a function over an interval using
- *  Simpson's rule. The error should be proportional to $h^4$, although in
- *  practice you will want to verify that the result is stable to desired
- *  precision when epsilon changes.
- * Status: mostly untested
+ * Description: Integral of $f$ over $[a, b]$ with Simpson's rule on $2n$
+ * intervals. The error shrinks like $h^4$; check that the answer is
+ * stable when increasing $n$.
+ * Usage: double area = simpson(0, 1, [](double x) { return x * x; });
+ * Time: $O(n)$ evaluations of $f$.
  */
 #pragma once
 
-double quad(double a, double b, auto f, const ll n = 1000) {
-	double h = (b - a) / 2 / n, v = f(a) + f(b);
-	fore(i,1,n*2)
-		v += f(a + i*h) * (i&1 ? 4 : 2);
-	return v * h / 3;
+double simpson(double a, double b, auto f, ll n = 1000) {
+	double h = (b - a) / (2 * n);
+	double sum = f(a) + f(b);
+	// weights 1 4 2 4 2 ... 4 1
+	fore(i, 1, 2 * n) sum += f(a + i * h) * (i % 2 == 1 ? 4 : 2);
+	return sum * h / 3;
 }

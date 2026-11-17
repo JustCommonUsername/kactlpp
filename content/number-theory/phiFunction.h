@@ -1,5 +1,5 @@
 /**
- * Author: Håkan Terelius
+ * Author: Håkan Terelius, rewritten for readability
  * Date: 2009-09-25
  * License: CC0
  * Source: http://en.wikipedia.org/wiki/Euler's_totient_function
@@ -15,15 +15,26 @@
  * \textbf{Generalization}: $m \geq \log_2(n) \Rightarrow x^m \equiv x^{\phi(n) + (m \bmod{\phi(n)})} \pmod{n}$.
  *
  * \textbf{Fermat's little thm}: $p$ prime $\Rightarrow \forall a : a^{p-1} \equiv 1 \pmod{p}$.
- * Status: Tested
+ * Time: $O(\sqrt n)$ for one value, $O(N \log \log N)$ for the sieve.
  */
 #pragma once
 
-const ll LIM = 5000000;
-array<ll, LIM> phi;
+ll phi(ll n) {
+	ll res = n;
+	for (ll p = 2; p * p <= n; p++) {
+		if (n % p != 0) continue;
+		while (n % p == 0) n /= p;
+		res -= res / p; // multiply by (1 - 1/p)
+	}
+	if (n > 1) res -= res / n;
+	return res;
+}
 
-void calculatePhi() {
-	fore(i,0,LIM) phi[i] = i&1 ? i : i/2;
-	for (ll i = 3; i < LIM; i += 2) if (phi[i] == i)
-		for (ll j = i; j < LIM; j += i) phi[j] -= phi[j] / i;
+// phiTable[i] = phi(i) for all i < N
+vi phiSieve(ll N) {
+	vi phiTable(N);
+	iota(ALL(phiTable), 0);
+	fore(p, 2, N) if (phiTable[p] == p) // p is prime
+		for (ll j = p; j < N; j += p) phiTable[j] -= phiTable[j] / p;
+	return phiTable;
 }

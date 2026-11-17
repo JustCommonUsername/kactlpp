@@ -1,26 +1,29 @@
 /**
- * Author: Simon Lindholm
+ * Author: Simon Lindholm, rewritten for readability
  * Date: 2016-09-06
  * License: CC0
  * Source: folklore
- * Description: Calculates determinant of a matrix. Destroys the matrix.
+ * Description: Determinant of a square matrix with Gaussian elimination.
+ * Swapping two rows flips the sign; the result is the product of the pivots.
+ * For an exact result mod p, use \texttt{ll}, multiply by the modular
+ * inverse instead of dividing and check \texttt{!= 0} instead of EPS.
  * Time: $O(N^3)$
- * Status: somewhat tested
  */
 #pragma once
 
-double det(vector<vector<double>>& a) {
-	ll n = SZ(a); double res = 1;
-	fore(i,0,n) {
-		ll b = i;
-		fore(j,i+1,n) if (fabs(a[j][i]) > fabs(a[b][i])) b = j;
-		if (i != b) swap(a[i], a[b]), res *= -1;
-		res *= a[i][i];
-		if (res == 0) return 0;
-		fore(j,i+1,n) {
-			double v = a[j][i] / a[i][i];
-			if (v != 0) fore(k,i+1,n) a[j][k] -= v * a[i][k];
+double determinant(vector<vector<double>> a) {
+	ll n = SZ(a);
+	double det = 1;
+	fore(col, 0, n) {
+		ll best = col;
+		fore(i, col + 1, n) if (fabs(a[i][col]) > fabs(a[best][col])) best = i;
+		if (fabs(a[best][col]) < 1e-12) return 0;
+		if (best != col) swap(a[best], a[col]), det = -det;
+		det *= a[col][col];
+		fore(i, col + 1, n) {
+			double factor = a[i][col] / a[col][col];
+			fore(j, col, n) a[i][j] -= factor * a[col][j];
 		}
 	}
-	return res;
+	return det;
 }

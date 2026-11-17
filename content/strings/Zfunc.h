@@ -1,22 +1,22 @@
 /**
- * Author: chilli
+ * Author: chilli, rewritten for readability
  * License: CC0
- * Description: z[i] computes the length of the longest common prefix of s[i:] and s,
- * except z[0] = 0. (abacaba -> 0010301)
+ * Description: \texttt{z[i]} = length of the longest common prefix of
+ * \texttt{s} and \texttt{s[i..]}, with \texttt{z[0] = 0} (abacaba -> 0010301).
+ * Pattern matching: compute z of \texttt{pattern + '\#' + text}.
  * Time: O(n)
- * Status: stress-tested
  */
 #pragma once
 
-vi Z(const string& S) {
-	vi z(SZ(S));
-	ll l = -1, r = -1;
-	fore(i,1,SZ(S)) {
-		z[i] = i >= r ? 0 : min(r - i, z[i - l]);
-		while (i + z[i] < SZ(S) && S[i + z[i]] == S[z[i]])
-			z[i]++;
-		if (i + z[i] > r)
-			l = i, r = i + z[i];
+vi zFunction(const string& s) {
+	ll n = SZ(s);
+	vi z(n, 0);
+	// [l, r) = rightmost segment that matches a prefix of s
+	ll l = 0, r = 0;
+	fore(i, 1, n) {
+		if (i < r) z[i] = min(r - i, z[i - l]);
+		while (i + z[i] < n && s[z[i]] == s[i + z[i]]) z[i]++;
+		if (i + z[i] > r) l = i, r = i + z[i];
 	}
 	return z;
 }

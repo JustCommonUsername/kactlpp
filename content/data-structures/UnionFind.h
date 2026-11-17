@@ -1,24 +1,39 @@
 /**
- * Author: Lukas Polacek
+ * Author: Lukas Polacek, rewritten for readability
  * Date: 2009-10-26
  * License: CC0
  * Source: folklore
- * Description: Disjoint-set data structure.
- * Time: $O(\alpha(N))$
+ * Description: Disjoint-set union (union by size + path compression).
+ * Usage: UnionFind uf(n); uf.join(a, b); uf.connected(a, b);
+ * Time: $O(\alpha(N))$ per operation, practically constant.
  */
 #pragma once
 
-struct UF {
-	vi e;
-	UF(ll n) : e(n, -1) {}
-	bool sameSet(ll a, ll b) { return find(a) == find(b); }
-	ll size(ll x) { return -e[find(x)]; }
-	ll find(ll x) { return e[x] < 0 ? x : e[x] = find(e[x]); }
+struct UnionFind {
+	// parent[u] = parent of u, a root is its own parent
+	// size[r] = number of nodes in the set of root r
+	ll numSets;
+	vi parent, size;
+	UnionFind(ll N) : numSets(N), parent(N), size(N, 1) {
+		iota(parent.begin(), parent.end(), 0);
+	}
+
+	ll root(ll u) {
+		if (parent[u] == u) return u;
+		return parent[u] = root(parent[u]);
+	}
+
+	// returns false if a and b were already in the same set
 	bool join(ll a, ll b) {
-		a = find(a), b = find(b);
+		a = root(a), b = root(b);
 		if (a == b) return false;
-		if (e[a] > e[b]) swap(a, b);
-		e[a] += e[b], e[b] = a;
+		if (size[a] < size[b]) swap(a, b);
+		parent[b] = a;
+		size[a] += size[b];
+		numSets--;
 		return true;
 	}
+
+	bool connected(ll a, ll b) { return root(a) == root(b); }
+	ll setSize(ll u) { return size[root(u)]; }
 };

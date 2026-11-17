@@ -1,31 +1,32 @@
 /**
- * Author: Simon Lindholm
+ * Author: Simon Lindholm, rewritten for readability
  * Date: 2015-02-23
  * License: CC0
- * Source: http://en.wikipedia.org/wiki/Bellman-Ford_algorithm
- * Description: Calculates shortest paths from $s$ in a graph that might have negative edge weights.
- * Stores the answer in nodes. Unreachable nodes get dist = inf; nodes reachable through
- * negative-weight cycles get dist = -inf.
- * Assumes $V^2 \max |w_i| < \tilde{} 2^{63}$.
+ * Source: Wikipedia, folklore
+ * Description: Shortest paths from \texttt{s} when edge weights can be
+ * negative. Unreachable nodes get \texttt{INF}, nodes whose distance can
+ * be made arbitrarily small (reachable from a negative cycle) get \texttt{-INF}.
+ * Usage: vector<Edge> edges; edges.pb({u, v, w}); vi d = bellmanFord(n, edges, s);
  * Time: O(VE)
- * Status: Tested on kattis:shortestpath3
  */
 #pragma once
 
-const ll inf = LLONG_MAX;
-struct Ed { ll a, b, w, s() { return a < b ? a : -a; }};
-struct Node { ll dist = inf, prev = -1; };
+const ll INF = LLONG_MAX / 4;
+struct Edge { ll from, to, weight; };
 
-void bellmanFord(vector<Node>& nodes, vector<Ed>& eds, ll s) {
-	nodes[s].dist = 0;
-	sort(ALL(eds), [](Ed a, Ed b) { return a.s() < b.s(); });
-	ll lim = SZ(nodes) / 2 + 2; // /3+100 with shuffled vertices
-	fore(i,0,lim) for (Ed ed : eds) {
-		Node cur = nodes[ed.a], &dest = nodes[ed.b];
-		if (abs(cur.dist) == inf) continue;
-		ll d = cur.dist + ed.w;
-		if (d < dest.dist) dest = {i < lim-1 ? d : -inf, ed.a};
-	}
-	fore(i,0,lim) for (Ed e : eds)
-		if (nodes[e.a].dist == -inf) nodes[e.b].dist = -inf;
+vi bellmanFord(ll n, vector<Edge>& edges, ll s) {
+	vi dist(n, INF);
+	dist[s] = 0;
+	// after n - 1 rounds all shortest paths are final
+	fore(round, 0, n - 1)
+		for (auto& e : edges)
+			if (dist[e.from] != INF)
+				dist[e.to] = min(dist[e.to], dist[e.from] + e.weight);
+	// whatever still improves is on/after a negative cycle
+	fore(round, 0, n)
+		for (auto& e : edges)
+			if (dist[e.from] != INF &&
+			    (dist[e.from] == -INF || dist[e.from] + e.weight < dist[e.to]))
+				dist[e.to] = -INF;
+	return dist;
 }
