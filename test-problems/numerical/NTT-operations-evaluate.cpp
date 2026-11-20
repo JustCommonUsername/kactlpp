@@ -1,7 +1,7 @@
 // Problem: https://judge.yosupo.jp/problem/multipoint_evaluation
 // Status: AC
 // Submission: https://judge.yosupo.jp/submission/243662
-#include "../../stdc++.h"
+#include <bits/stdc++.h>
 using namespace std;
 
 #define fst first

@@ -1,6 +1,6 @@
 // Problem: https://open.kattis.com/problems/gamescheduling
 // Status: Accepted
-#include "../../stdc++.h"
+#include <bits/stdc++.h>
 using namespace std;
 #define fst first
 #define snd second

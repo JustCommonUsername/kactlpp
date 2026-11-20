@@ -1,7 +1,7 @@
 // Problem: https://open.kattis.com/problems/shortestpath3
 // Status: Accepted
 // Test with shuffled vertices
-#include "../../stdc++.h"
+#include <bits/stdc++.h>
 using namespace std;
 
 #define fst first

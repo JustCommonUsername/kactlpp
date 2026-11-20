@@ -1,7 +1,7 @@
 // Problem: https://cses.fi/problemset/task/1675/
 // Status: ACCEPTED
 // Submission: https://cses.fi/problemset/result/10944299/
-#include "../../stdc++.h"
+#include <bits/stdc++.h>
 using namespace std;
 #define fst first
 #define snd second

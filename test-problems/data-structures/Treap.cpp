@@ -1,7 +1,7 @@
 // Problem: https://www.spoj.com/problems/HORRIBLE/
 // Status: accepted
 // Test usage as normal lazy segment tree
-#include "../../stdc++.h"
+#include <bits/stdc++.h>
 using namespace std;
 
 #define fst first
