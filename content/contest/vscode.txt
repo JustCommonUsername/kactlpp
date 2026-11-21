@@ -1,0 +1,9 @@
+VS Code setup:
+1. Snippet: Ctrl+Shift+P > "Snippets: Configure Snippets"
+   > cpp. Add {"tmpl": {"prefix": "tmpl", "body": [...]}}
+   with one "..." string per template line, \t for a tab,
+   \" for a quote, $0 where the cursor should go.
+   In a .cpp file type tmpl + Enter.
+2. Terminal: menu Terminal > New Terminal.
+3. Type run.sh below, then: chmod +x run.sh
+4. Samples: A1.in, A1.ans, A2.in, ... next to A.cpp.

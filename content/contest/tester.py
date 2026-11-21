@@ -1,15 +1,24 @@
-from os import system
+# Stress test: runs good (brute force) and bad (your solution)
+# on random tests from caseGen until the outputs differ.
+# Compile all three first, then: python3 tester.py
+import subprocess
 
-it = 100000
-for t in range(it):
-	system("./caseGen > in")
-	system("./good < in > o")
-	system("./bad < in > o2")
-	x = open("o", "r").read().strip().split()
-	y = open("o2", "r").read().strip().split()
+def run(cmd, inp=None):
+	return subprocess.run(cmd, input=inp, capture_output=True,
+	                      text=True, shell=True).stdout
 
-	for i in range(len(x)):
-		if (x[i] != y[i]):
-			print("FAILED!!!!!", i + 1)
-			exit(0)
-	print("ok", t + 1)
+for t in range(1, 100001):
+	inp = run(f"./caseGen {t}")
+	a = run("./good", inp).split()
+	if not a:
+		print("good printed nothing: compiled? right name?")
+		break
+	b = run("./bad", inp).split()
+	if a != b:
+		print("FAILED on seed", t, "input:")
+		print(inp)
+		print("good:", *a)
+		print("bad: ", *b)
+		break
+	if t % 100 == 0:
+		print("ok", t)
