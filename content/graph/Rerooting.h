@@ -1,70 +1,94 @@
 /**
- * Author: folklore, written for readability
- * Date: 2026-11-17
+ * Author: team, rewritten for readability
+ * Date: 2026-11-21
  * License: CC0
  * Source: folklore
- * Description: Rerooting DP: an answer for every node as the root, in
- * $O(N)$ instead of $O(N^2)$. Pass 1 (children before parent): \texttt{down[u]}
- * = answer inside the subtree of u. Pass 2 (parent before children):
- * \texttt{up[v]} = answer from everything outside the subtree of v, computed
- * from u = parent(v) as "all of u except the part coming from v".
- * If the combine can be undone (sum) subtract v's part; otherwise (max)
- * keep the best two children, or prefix/suffix maxima over the children.
- * \texttt{sumDist[u]} = sum of distances from u to all nodes.
- * \texttt{farthest[u]} = max distance from u to any node.
- * Usage: rerootSumDist(adj); rerootFarthest(adj);
+ * Description: Rerooting DP: an answer for every node as the root in
+ * $O(N)$ instead of $O(N^2)$. Recipe:
+ * (1) root the tree at 0 and compute subtree info with a DFS,
+ * (2) compute the answer for root 0,
+ * (3) DFS again and move the root from u to each child x:
+ * ans[x] = ans[u] + (change for nodes outside x's subtree)
+ * + (change for nodes inside x's subtree).
+ * If the answer is a sum, the change is easy (example 1). If it is a
+ * max, also keep the best two children (example 2).
+ * The DFS is recursive; on a path of $10^6$ nodes the stack may
+ * overflow, then use the iterative order from TreeDP.h.
+ * Usage: vi s = sumOfDistances(adj); vi f = farthestNode(adj);
  * Time: O(N)
  */
 #pragma once
 
-vi order, par;
-// BFS order from node 0: parents come before their children
-void buildOrder(vector<vi>& adj) {
+// sum of distances from every node to all other nodes
+vi sumOfDistances(vector<vi>& adj) {
 	ll n = SZ(adj);
-	order = {0}, par.assign(n, -1);
-	for (ll i = 0; i < SZ(order); i++) {
-		ll u = order[i];
-		for (ll v : adj[u]) if (v != par[u]) par[v] = u, order.pb(v);
-	}
+	// step 1: subtree sizes and depths with root 0
+	vi subtreeSize(n, 1), depth(n, 0);
+	auto dfsSize = [&](ll u, ll p, auto&& self) -> void {
+		for (ll x : adj[u]) {
+			if (x == p) continue;
+			depth[x] = depth[u] + 1;
+			self(x, u, self);
+			subtreeSize[u] += subtreeSize[x];
+		}
+	};
+	dfsSize(0, -1, dfsSize);
+
+	// step 2: answer for root 0 = sum of all depths
+	vi sumDist(n);
+	sumDist[0] = accumulate(ALL(depth), 0LL);
+
+	// step 3: move the root from u to x. The subtreeSize[x] nodes
+	// inside get 1 closer, the n - subtreeSize[x] outside 1 further.
+	auto reroot = [&](ll u, ll p, auto&& self) -> void {
+		for (ll x : adj[u]) {
+			if (x == p) continue;
+			sumDist[x] = sumDist[u] + (n - subtreeSize[x]) - subtreeSize[x];
+			self(x, u, self);
+		}
+	};
+	reroot(0, -1, reroot);
+	return sumDist;
 }
 
-vi sumDist;
-void rerootSumDist(vector<vi>& adj) {
+// distance from every node to the farthest node
+vi farthestNode(vector<vi>& adj) {
 	ll n = SZ(adj);
-	buildOrder(adj);
-	vi size(n, 1), down(n, 0); // down[u] = sum of dist from u into subtree
-	for (ll i = n - 1; i > 0; i--) {
-		ll u = order[i], p = par[u];
-		size[p] += size[u];
-		down[p] += down[u] + size[u]; // every node of u is 1 step further
-	}
-	sumDist.assign(n, 0);
-	sumDist[0] = down[0];
-	fore(i, 1, n) {
-		ll v = order[i], u = par[v];
-		// moving the root u -> v: size[v] nodes get 1 closer, n - size[v] further
-		sumDist[v] = sumDist[u] - size[v] + (n - size[v]);
-	}
-}
+	// step 1: down1[u] = longest path down from u, down2[u] = second
+	// longest through a DIFFERENT child, bestChild[u] = child of down1
+	vi down1(n, 0), down2(n, 0), bestChild(n, -1);
+	auto dfsDown = [&](ll u, ll p, auto&& self) -> void {
+		for (ll x : adj[u]) {
+			if (x == p) continue;
+			self(x, u, self);
+			ll len = down1[x] + 1;
+			if (len > down1[u]) {
+				down2[u] = down1[u];
+				down1[u] = len, bestChild[u] = x;
+			} else if (len > down2[u]) {
+				down2[u] = len;
+			}
+		}
+	};
+	dfsDown(0, -1, dfsDown);
 
-vi farthest;
-void rerootFarthest(vector<vi>& adj) {
-	ll n = SZ(adj);
-	buildOrder(adj);
-	// best1[u], best2[u] = two largest depths into different children,
-	// bestChild[u] = child that gives best1
-	vi best1(n, 0), best2(n, 0), bestChild(n, -1), up(n, 0);
-	for (ll i = n - 1; i > 0; i--) {
-		ll u = order[i], p = par[u], d = best1[u] + 1;
-		if (d > best1[p]) best2[p] = best1[p], best1[p] = d, bestChild[p] = u;
-		else if (d > best2[p]) best2[p] = d;
-	}
-	// up[v] = longest path starting at v that first goes to parent(v)
-	fore(i, 1, n) {
-		ll v = order[i], u = par[v];
-		ll downWithoutV = bestChild[u] == v ? best2[u] : best1[u];
-		up[v] = 1 + max(up[u], downWithoutV);
-	}
-	farthest.assign(n, 0);
-	fore(u, 0, n) farthest[u] = max(best1[u], up[u]);
+	// step 2: up[u] = longest path that starts at u and goes to its
+	// parent first; the root has no parent, so up[0] = 0
+	vi up(n, 0);
+
+	// step 3: from x, going up to u, we may continue up from u or go
+	// down from u, but not back into x (so use down2 if x is u's best)
+	auto reroot = [&](ll u, ll p, auto&& self) -> void {
+		for (ll x : adj[u]) {
+			if (x == p) continue;
+			ll downAvoidingX = bestChild[u] == x ? down2[u] : down1[u];
+			up[x] = 1 + max(up[u], downAvoidingX);
+			self(x, u, self);
+		}
+	};
+	reroot(0, -1, reroot);
+
+	vi farthest(n);
+	fore(u, 0, n) farthest[u] = max(down1[u], up[u]);
+	return farthest;
 }
