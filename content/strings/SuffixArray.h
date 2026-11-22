@@ -23,10 +23,10 @@ struct SuffixArray {
 				return ii(rnk[i], i + k < n ? rnk[i + k] : -1);
 			};
 			sort(ALL(sa), [&](ll a, ll b) { return key(a) < key(b); });
-			vi newRank(n, 0);
+			vi new_rank(n, 0);
 			fore(i, 1, n)
-				newRank[sa[i]] = newRank[sa[i-1]] + (key(sa[i-1]) < key(sa[i]));
-			rnk = newRank;
+				new_rank[sa[i]] = new_rank[sa[i-1]] + (key(sa[i-1]) < key(sa[i]));
+			rnk = new_rank;
 			if (rnk[sa[n - 1]] == n - 1 || k >= n) break;
 		}
 		// Kasai: lcp decreases by at most 1 when moving to the next suffix

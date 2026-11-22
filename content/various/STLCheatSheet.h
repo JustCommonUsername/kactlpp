@@ -11,7 +11,7 @@
  */
 #pragma once
 
-void stlExamples() {
+void stl_examples() {
 	vi v = {5, 1, 4};
 	sort(ALL(v), greater<ll>());                    // decreasing
 	sort(ALL(v), [](ll a, ll b) { return abs(a) < abs(b); });
@@ -28,8 +28,8 @@ void stlExamples() {
 	freq["abc"]++;                           // missing key starts at 0
 	for (auto& [key, value] : freq) cout << key << value; // by key
 
-	priority_queue<ll, vi, greater<ll>> minHeap;
-	priority_queue<pair<ll, ll>> maxHeap;    // largest first, then second
+	priority_queue<ll, vi, greater<ll>> min_heap;
+	priority_queue<pair<ll, ll>> max_heap;    // largest first, then second
 
 	// fixed precision output of doubles
 	cout << fixed << setprecision(9) << 3.14159265358979 << '\n';

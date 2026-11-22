@@ -9,12 +9,12 @@
  * Several independent games played together: XOR their grundy values
  * (normal Nim: XOR of the heap sizes). Example: from a heap of size x
  * you may remove any amount listed in \texttt{moves}.
- * Usage: vi g = grundyTable(100, {1, 3, 4}); first player wins iff g[x] != 0
+ * Usage: vi g = grundy_table(100, {1, 3, 4}); first player wins iff g[x] != 0
  * Time: O(N \cdot |moves|)
  */
 #pragma once
 
-vi grundyTable(ll N, vi moves) {
+vi grundy_table(ll N, vi moves) {
 	vi g(N + 1, 0);
 	fore(x, 0, N + 1) {
 		set<ll> reachable;

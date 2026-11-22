@@ -3,16 +3,16 @@
  * Date: 2026-11-17
  * License: CC0
  * Source: folklore
- * Description: \texttt{nextGreater[i]} = first j > i with a[j] > a[i] (or n).
+ * Description: \texttt{next\_greater[i]} = first j > i with a[j] > a[i] (or n).
  * The stack holds indices whose answer is still unknown, with decreasing
  * values. Same idea: previous smaller, largest rectangle in a histogram.
- * \texttt{slidingMin} = minimum of every window of length k; the deque holds
+ * \texttt{sliding\_min} = minimum of every window of length k; the deque holds
  * indices with increasing values, the front is the minimum.
  * Time: O(N)
  */
 #pragma once
 
-vi nextGreater(vi& a) {
+vi next_greater(vi& a) {
 	ll n = SZ(a);
 	vi res(n, n), stk;
 	fore(i, 0, n) {
@@ -25,7 +25,7 @@ vi nextGreater(vi& a) {
 	return res;
 }
 
-vi slidingMin(vi& a, ll k) {
+vi sliding_min(vi& a, ll k) {
 	vi res;
 	deque<ll> dq;
 	fore(i, 0, SZ(a)) {

@@ -28,7 +28,7 @@ struct MergeSortTree {
 	}
 
 	// values in [lo, hi] inside one sorted node
-	ll countNode(vi& vals, ll lo, ll hi) {
+	ll count_node(vi& vals, ll lo, ll hi) {
 		return upper_bound(ALL(vals), hi) - lower_bound(ALL(vals), lo);
 	}
 
@@ -37,8 +37,8 @@ struct MergeSortTree {
 		ll res = 0;
 		if (lo > hi) return 0; // else upper - lower would be negative
 		for (l += n, r += n; l < r; l /= 2, r /= 2) {
-			if (l % 2 == 1) res += countNode(tree[l++], lo, hi);
-			if (r % 2 == 1) res += countNode(tree[--r], lo, hi);
+			if (l % 2 == 1) res += count_node(tree[l++], lo, hi);
+			if (r % 2 == 1) res += count_node(tree[--r], lo, hi);
 		}
 		return res;
 	}

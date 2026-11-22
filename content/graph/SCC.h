@@ -16,36 +16,36 @@
 // subtree of u using at most one back edge; stack = nodes not yet
 // assigned to a component
 vi tin, low, comp, stk;
-vector<bool> onStack;
-ll timer, numComps;
+vector<bool> on_stack;
+ll timer, num_comps;
 
 void tarjan(ll u, vector<vi>& adj) {
 	tin[u] = low[u] = timer++;
-	stk.pb(u), onStack[u] = true;
+	stk.pb(u), on_stack[u] = true;
 	for (ll v : adj[u]) {
 		if (tin[v] == -1) {
 			tarjan(v, adj);
 			low[u] = min(low[u], low[v]);
-		} else if (onStack[v]) {
+		} else if (on_stack[v]) {
 			low[u] = min(low[u], tin[v]);
 		}
 	}
 	if (low[u] == tin[u]) { // u is the root of a component
 		while (true) {
 			ll v = stk.back();
-			stk.pop_back(), onStack[v] = false;
-			comp[v] = numComps;
+			stk.pop_back(), on_stack[v] = false;
+			comp[v] = num_comps;
 			if (v == u) break;
 		}
-		numComps++;
+		num_comps++;
 	}
 }
 
 ll scc(vector<vi>& adj) {
 	ll n = SZ(adj);
 	tin.assign(n, -1), low.assign(n, 0), comp.assign(n, -1);
-	onStack.assign(n, false), stk.clear();
-	timer = numComps = 0;
+	on_stack.assign(n, false), stk.clear();
+	timer = num_comps = 0;
 	fore(u, 0, n) if (tin[u] == -1) tarjan(u, adj);
-	return numComps;
+	return num_comps;
 }

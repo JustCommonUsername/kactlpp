@@ -29,7 +29,7 @@ ll go(ll pos, ll sum, bool tight) {
 	return res;
 }
 
-ll countDigitSum(ll N, ll S) {
+ll count_digit_sum(ll N, ll S) {
 	if (N < 0) return 0;
 	digits = to_string(N), target = S;
 	memo.assign(SZ(digits), vector<array<ll, 2>>(S + 1, {-1, -1}));

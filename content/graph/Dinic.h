@@ -4,11 +4,11 @@
  * License: CC0
  * Source: https://cp-algorithms.com/graph/dinic.html
  * Description: Maximum flow / minimum cut with Dinic's algorithm.
- * After \texttt{maxFlow(s, t)}, the nodes with \texttt{level[u] != 0}
+ * After \texttt{max\_flow(s, t)}, the nodes with \texttt{level[u] != 0}
  * are on the source side of a minimum cut.
  * Bipartite matching: source -> left (cap 1), left -> right (cap 1),
  * right -> sink (cap 1).
- * Usage: Dinic flow(n); flow.addEdge(u, v, cap); ll f = flow.maxFlow(s, t);
+ * Usage: Dinic flow(n); flow.add_edge(u, v, cap); ll f = flow.max_flow(s, t);
  * Time: $O(V^2 E)$, $O(E \sqrt V)$ for bipartite matching.
  */
 #pragma once
@@ -16,18 +16,18 @@
 struct Dinic {
 	// edge u -> to with remaining capacity cap; adj[to][rev] is
 	// the reverse edge (used to undo flow)
-	struct Edge { ll to, rev, cap, originalCap; };
+	struct Edge { ll to, rev, cap, original_cap; };
 	vector<vector<Edge>> adj;
-	vi level, nextEdge;
-	Dinic(ll n) : adj(n), level(n), nextEdge(n) {}
+	vi level, next_edge;
+	Dinic(ll n) : adj(n), level(n), next_edge(n) {}
 
-	void addEdge(ll u, ll v, ll cap, ll reverseCap = 0) {
+	void add_edge(ll u, ll v, ll cap, ll reverse_cap = 0) {
 		adj[u].pb({v, SZ(adj[v]), cap, cap});
-		adj[v].pb({u, SZ(adj[u]) - 1, reverseCap, reverseCap});
+		adj[v].pb({u, SZ(adj[u]) - 1, reverse_cap, reverse_cap});
 	}
 
 	// BFS: level[u] = distance from s using edges with cap > 0
-	bool buildLevels(ll s, ll t) {
+	bool build_levels(ll s, ll t) {
 		fill(ALL(level), 0);
 		level[s] = 1;
 		queue<ll> q;
@@ -44,12 +44,12 @@ struct Dinic {
 	}
 
 	// DFS: push flow along edges that go one level deeper
-	ll pushFlow(ll u, ll t, ll flow) {
+	ll push_flow(ll u, ll t, ll flow) {
 		if (u == t) return flow;
-		for (ll& i = nextEdge[u]; i < SZ(adj[u]); i++) {
+		for (ll& i = next_edge[u]; i < SZ(adj[u]); i++) {
 			Edge& e = adj[u][i];
 			if (e.cap > 0 && level[e.to] == level[u] + 1) {
-				ll pushed = pushFlow(e.to, t, min(flow, e.cap));
+				ll pushed = push_flow(e.to, t, min(flow, e.cap));
 				if (pushed > 0) {
 					e.cap -= pushed;
 					adj[e.to][e.rev].cap += pushed;
@@ -60,14 +60,14 @@ struct Dinic {
 		return 0;
 	}
 
-	ll maxFlow(ll s, ll t) {
+	ll max_flow(ll s, ll t) {
 		ll total = 0;
-		while (buildLevels(s, t)) {
-			fill(ALL(nextEdge), 0);
-			while (ll pushed = pushFlow(s, t, LLONG_MAX)) total += pushed;
+		while (build_levels(s, t)) {
+			fill(ALL(next_edge), 0);
+			while (ll pushed = push_flow(s, t, LLONG_MAX)) total += pushed;
 		}
 		return total;
 	}
 
-	// flow on edge e = e.originalCap - e.cap (if positive)
+	// flow on edge e = e.original_cap - e.cap (if positive)
 };

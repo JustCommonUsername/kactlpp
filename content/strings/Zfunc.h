@@ -8,7 +8,7 @@
  */
 #pragma once
 
-vi zFunction(const string& s) {
+vi z_function(const string& s) {
 	ll n = SZ(s);
 	vi z(n, 0);
 	// [l, r) = rightmost segment that matches a prefix of s

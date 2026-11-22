@@ -4,14 +4,14 @@
  * License: CC0
  * Description: Prefix function: \texttt{pi[i]} = length of the longest
  * proper prefix of \texttt{s[0..i]} that is also a suffix of it
- * (abacaba -> 0010123). \texttt{findAll} returns all start positions
+ * (abacaba -> 0010123). \texttt{find\_all} returns all start positions
  * of \texttt{pattern} in \texttt{text}.
  * Smallest period of s: $p = n - \pi[n-1]$ (s is a repetition iff $p \mid n$).
  * Time: O(n)
  */
 #pragma once
 
-vi prefixFunction(const string& s) {
+vi prefix_function(const string& s) {
 	ll n = SZ(s);
 	vi pi(n, 0);
 	fore(i, 1, n) {
@@ -23,9 +23,9 @@ vi prefixFunction(const string& s) {
 	return pi;
 }
 
-vi findAll(const string& text, const string& pattern) {
+vi find_all(const string& text, const string& pattern) {
 	ll m = SZ(pattern);
-	vi pi = prefixFunction(pattern + '\0' + text), res;
+	vi pi = prefix_function(pattern + '\0' + text), res;
 	fore(i, 2 * m, SZ(pi))
 		if (pi[i] == m) res.pb(i - 2 * m);
 	return res;

@@ -4,21 +4,21 @@
  * License: CC0
  * Source: folklore
  * Description: Binary search on integers. \texttt{ok} must be monotone:
- * \texttt{firstTrue} needs false...false true...true and returns the first
- * true (hi + 1 if none), \texttt{lastTrue} needs true...true false...false
+ * \texttt{first\_true} needs false...false true...true and returns the first
+ * true (hi + 1 if none), \texttt{last\_true} needs true...true false...false
  * and returns the last true (lo - 1 if none).
- * On a sorted array: \texttt{lowerBound} = first index with a[i] $\ge$ x,
- * \texttt{upperBound} = first index with a[i] > x (n if none);
- * x occurs \texttt{upperBound - lowerBound} times.
+ * On a sorted array: \texttt{my\_lower\_bound} = first index with a[i] $\ge$ x,
+ * \texttt{my\_upper\_bound} = first index with a[i] > x (n if none);
+ * x occurs \texttt{my\_upper\_bound - my\_lower\_bound} times.
  * Search on the answer: "minimize the maximum" / "maximize the minimum"
  * $\Rightarrow$ guess the answer and check it greedily (example below).
  * \texttt{compress} maps values to 0..k-1 keeping their order.
- * Usage: ll x = firstTrue(0, 2e18, [\&](ll x) { return check(x); });
+ * Usage: ll x = first_true(0, 2e18, [\&](ll x) { return check(x); });
  * Time: O(\log(hi - lo)) calls of ok.
  */
 #pragma once
 
-ll firstTrue(ll lo, ll hi, auto ok) {
+ll first_true(ll lo, ll hi, auto ok) {
 	// invariant: answer is in [lo, hi + 1]
 	hi++;
 	while (lo < hi) {
@@ -29,7 +29,7 @@ ll firstTrue(ll lo, ll hi, auto ok) {
 	return lo;
 }
 
-ll lastTrue(ll lo, ll hi, auto ok) {
+ll last_true(ll lo, ll hi, auto ok) {
 	// invariant: answer is in [lo - 1, hi]
 	lo--;
 	while (lo < hi) {
@@ -40,16 +40,16 @@ ll lastTrue(ll lo, ll hi, auto ok) {
 	return lo;
 }
 
-ll lowerBound(vi& a, ll x) {
-	return firstTrue(0, SZ(a) - 1, [&](ll i) { return a[i] >= x; });
+ll my_lower_bound(vi& a, ll x) {
+	return first_true(0, SZ(a) - 1, [&](ll i) { return a[i] >= x; });
 }
-ll upperBound(vi& a, ll x) {
-	return firstTrue(0, SZ(a) - 1, [&](ll i) { return a[i] > x; });
+ll my_upper_bound(vi& a, ll x) {
+	return first_true(0, SZ(a) - 1, [&](ll i) { return a[i] > x; });
 }
 
 // Example: split a (a[i] >= 0) into at most k consecutive parts so
 // that the largest part sum is minimal. Check: greedily fill parts.
-ll minLargestPart(vi& a, ll k) {
+ll min_largest_part(vi& a, ll k) {
 	auto ok = [&](ll limit) {
 		ll parts = 1, sum = 0;
 		for (ll x : a) {
@@ -59,7 +59,7 @@ ll minLargestPart(vi& a, ll k) {
 		}
 		return parts <= k;
 	};
-	return firstTrue(0, accumulate(ALL(a), 0LL), ok);
+	return first_true(0, accumulate(ALL(a), 0LL), ok);
 }
 
 // coordinate compression: a[i] becomes its rank among distinct values

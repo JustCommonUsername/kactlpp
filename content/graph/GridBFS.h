@@ -7,14 +7,14 @@
  * For multi-source BFS push all sources with distance 0 (e.g. "distance to the
  * nearest fire"). For diagonal moves use all 8 directions. Counting
  * components (flood fill): run it from every unvisited free cell.
- * Usage: auto d = gridBFS(grid, {{sr, sc}}); // d[r][c] = -1 if unreachable
+ * Usage: auto d = grid_bfs(grid, {{sr, sc}}); // d[r][c] = -1 if unreachable
  * Time: O(R C)
  */
 #pragma once
 
 const ll dr[] = {-1, 1, 0, 0}, dc[] = {0, 0, -1, 1}; // up down left right
 
-vector<vi> gridBFS(vector<string>& grid, vector<ii> sources) {
+vector<vi> grid_bfs(vector<string>& grid, vector<ii> sources) {
 	ll R = SZ(grid), C = SZ(grid[0]);
 	vector<vi> dist(R, vi(C, -1));
 	queue<ii> q;

@@ -6,8 +6,8 @@
  * Description: Fenwick tree (binary indexed tree). Point add and
  * prefix sum. Internally 1-based, the interface is 0-based.
  * For range add + point query: \texttt{add(l, x), add(r, -x)}
- * and the value at $i$ is \texttt{prefixSum(i + 1)}.
- * Usage: FenwickTree ft(n); ft.add(i, 5); ft.rangeSum(l, r);
+ * and the value at $i$ is \texttt{prefix\_sum(i + 1)}.
+ * Usage: FenwickTree ft(n); ft.add(i, 5); ft.range_sum(l, r);
  * Time: O(\log N) per operation.
  */
 #pragma once
@@ -24,12 +24,12 @@ struct FenwickTree {
 	}
 
 	// a[0] + ... + a[r - 1]
-	ll prefixSum(ll r) {
+	ll prefix_sum(ll r) {
 		ll res = 0;
 		for (; r > 0; r -= r & -r) res += bit[r];
 		return res;
 	}
 
 	// a[l] + ... + a[r - 1]
-	ll rangeSum(ll l, ll r) { return prefixSum(r) - prefixSum(l); }
+	ll range_sum(ll l, ll r) { return prefix_sum(r) - prefix_sum(l); }
 };

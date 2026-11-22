@@ -1,99 +1,96 @@
 /**
- * Author: someone on Codeforces and then modified by Iván Renison
- * Date: 2017-03-14
+ * Author: team, rewritten for readability
+ * Date: 2026-11-22
+ * License: CC0
  * Source: folklore
- * Description: A short self-balancing tree. It acts as a
- *  sequential container with log-time splits, joins, queries and updates.
- *  Can also support reversals with the commented REVERSE lines and getting the
- *  position of a node with the PARENT lines.
- * Time: $O(\log N)$
- * Status: stress-tested a bit and problem tested
+ * Description: Implicit treap: an array with insert/erase at any
+ * position, range reverse and cut-paste of ranges, all in $O(\log N)$.
+ * Positions are 0-based and never stored: a node's index is computed
+ * from subtree sizes. split(t, k) gives (first k elements, rest),
+ * merge(a, b) glues a in front of b. Every operation is: split into
+ * pieces, change one piece, merge back (see reverse\_range).
+ * Cut-paste [l, r) to the front: split into A, B, C, root = merge(merge(B, A), C).
+ * Range sum/min: add a field to Node and update it in recalc().
+ * Usage: Node* root = nullptr; fore(i,0,n) root = merge(root, new Node(a[i]));
+ * reverse_range(root, l, r); vi res; to_vector(root, res);
+ * Time: $O(\log N)$ expected per operation
  */
 #pragma once
 
-typedef ll T; typedef ll L; // T: data type, L: lazy type
-const T tneut = 0; const L lneut = 0; // neutrals
-T f(T a, T b) { return a + b; } // associative
-T apply(T v, L l, ll len) { // new st according to lazy
-	return v + l * len; }
-L comb(L a, L b) { return a + b; } // cumulative effect of lazy
-
+mt19937 treap_rng(12345);
 struct Node {
-	Node *l = 0, *r = 0;
-	// Node *p = 0; // PARENT
-	T val, acc; L lazy = lneut;
-	ll y, c = 1;
-	// bool rev = false; // REVERSE
-	Node(T val = tneut) : val(val), acc(val), y(rand()) {}
-	void recalc() {
-		c = 1, acc = tneut;
-		if (l) l->push(), acc = f(acc, l->acc), c += l->c;
-		acc = f(acc, val);
-		if (r) r->push(), acc = f(acc, r->acc), c += r->c;
-		// if (l) l->p = this; // PARENT
-		// if (r) r->p = this;
-	}
-	void push() {
-		// if (rev) { // REVERSE
-		// 	swap(l, r), rev = false;
-		// 	if (l) l->rev ^= 1; if (r) r->rev ^= 1;
-		// }
-		val = apply(val, lazy, 1), acc = apply(acc, lazy, c);
-		if (l) l->lazy = comb(l->lazy, lazy);
-		if (r) r->lazy = comb(r->lazy, lazy);
-		lazy = lneut;
-	}
-	// void pullAll() { // PARENT
-	// 	if (p) p->pullAll();
-	// 	push();
-	// }
-
-	Node* split(ll k) {
-		assert(k > 0);
-		if (k >= c) return 0;
-		push();
-		ll cnt = l ? l->c : 0;
-		if (k <= cnt) { // "k <= val" for lower_bound(k)
-			Node* nl = l->split(k),* ret = l;
-			l = nl;
-			recalc();
-			swap(*this, *ret);
-			return ret;
-		} else if (k == cnt + 1) { // k == val
-			Node* ret = r;
-			r = 0;
-			recalc();
-			return ret;
-		} else {
-			Node* ret = r->split(k - cnt - 1); // and just "k"
-			recalc(), ret->recalc();
-			return ret;
-		}
-	}
-	void merge(Node* ri) {
-		if (!ri) return;
-		push(), ri->push();
-		if (y > ri->y) {
-			if (r) r->merge(ri);
-			else r = ri;
-		} else {
-			merge(ri->l);
-			ri->l = ri;
-			swap(*this, *ri);
-		}
-		recalc();
-	}
-	// ll pos() { // In which position I am // PARENT
-	// 	pullAll();
-	// 	ll ans = l ? l->c : 0;
-	// 	if (!p) return ans;
-	// 	if (p->r == this) return ans + p->pos() + 1;
-	// 	else return p->pos() + 1 - (r ? r->c : 0);
-	// }
-	T query() { // Query full range
-		push();
-		return acc;
-	}
-	void upd(L v) { lazy = comb(lazy, v); } // Update full range
-	// void reverse() { rev = !rev; } // REVERSE
+	ll val, priority, size = 1;
+	bool rev = false; // lazy: children still have to be swapped
+	Node *left = nullptr, *right = nullptr;
+	Node(ll v) : val(v), priority(treap_rng()) {}
 };
+ll sz(Node* t) { return t ? t->size : 0; }
+void recalc(Node* t) { t->size = 1 + sz(t->left) + sz(t->right); }
+void push(Node* t) { // apply the lazy reverse one level down
+	if (t && t->rev) {
+		swap(t->left, t->right);
+		if (t->left) t->left->rev ^= 1;
+		if (t->right) t->right->rev ^= 1;
+		t->rev = false;
+	}
+}
+
+// (first k elements of t, the rest)
+pair<Node*, Node*> split(Node* t, ll k) {
+	if (!t) return {nullptr, nullptr};
+	push(t);
+	if (sz(t->left) < k) { // t and its left part go to the first half
+		auto [a, b] = split(t->right, k - sz(t->left) - 1);
+		t->right = a;
+		recalc(t);
+		return {t, b};
+	}
+	auto [a, b] = split(t->left, k);
+	t->left = b;
+	recalc(t);
+	return {a, t};
+}
+
+// all elements of a, then all elements of b
+Node* merge(Node* a, Node* b) {
+	if (!a || !b) return a ? a : b;
+	if (a->priority > b->priority) { // a becomes the root
+		push(a);
+		a->right = merge(a->right, b);
+		recalc(a);
+		return a;
+	}
+	push(b);
+	b->left = merge(a, b->left);
+	recalc(b);
+	return b;
+}
+
+void insert_at(Node*& root, ll pos, ll val) { // new element gets index pos
+	auto [a, b] = split(root, pos);
+	root = merge(merge(a, new Node(val)), b);
+}
+void erase_at(Node*& root, ll pos) {
+	auto [a, b] = split(root, pos);
+	auto [removed, c] = split(b, 1);
+	root = merge(a, c);
+}
+void reverse_range(Node*& root, ll l, ll r) { // reverses [l, r)
+	auto [a, b] = split(root, l);
+	auto [mid, c] = split(b, r - l);
+	if (mid) mid->rev ^= 1; // O(1): just flip the flag
+	root = merge(merge(a, mid), c);
+}
+ll get(Node* t, ll k) { // element at index k
+	push(t);
+	if (k < sz(t->left)) return get(t->left, k);
+	if (k == sz(t->left)) return t->val;
+	return get(t->right, k - sz(t->left) - 1);
+}
+void to_vector(Node* t, vi& out) { // the whole array, in order
+	if (!t) return;
+	push(t);
+	to_vector(t->left, out);
+	out.pb(t->val);
+	to_vector(t->right, out);
+}

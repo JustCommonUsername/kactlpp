@@ -8,16 +8,16 @@
  * in reverse order so that children come before their parent.
  * The example computes subtree sizes and maximum independent set, with
  * \texttt{take[u]} = best with u chosen, \texttt{skip[u]} = best without u.
- * Usage: ll best = treeDP(adj, 0);
+ * Usage: ll best = tree_dp(adj, 0);
  * Time: O(N)
  */
 #pragma once
 
-vi parent, subtreeSize;
+vi parent, subtree_size;
 
-ll treeDP(vector<vi>& adj, ll root) {
+ll tree_dp(vector<vi>& adj, ll root) {
 	ll n = SZ(adj);
-	parent.assign(n, -1), subtreeSize.assign(n, 1);
+	parent.assign(n, -1), subtree_size.assign(n, 1);
 	vi order = {root};
 	vector<bool> seen(n, false);
 	seen[root] = true;
@@ -33,7 +33,7 @@ ll treeDP(vector<vi>& adj, ll root) {
 	for (ll i = SZ(order) - 1; i >= 0; i--) {
 		ll u = order[i], p = parent[u];
 		if (p == -1) continue;
-		subtreeSize[p] += subtreeSize[u];
+		subtree_size[p] += subtree_size[u];
 		take[p] += skip[u];                // u cannot be taken with p
 		skip[p] += max(take[u], skip[u]);
 	}

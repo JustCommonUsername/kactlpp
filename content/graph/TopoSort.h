@@ -10,18 +10,18 @@
  */
 #pragma once
 
-vi topoSort(vector<vi>& adj) {
+vi topo_sort(vector<vi>& adj) {
 	ll n = SZ(adj);
-	vi inDegree(n, 0), order;
-	for (auto& out : adj) for (ll v : out) inDegree[v]++;
+	vi in_degree(n, 0), order;
+	for (auto& out : adj) for (ll v : out) in_degree[v]++;
 	queue<ll> q;
-	fore(u, 0, n) if (inDegree[u] == 0) q.push(u);
+	fore(u, 0, n) if (in_degree[u] == 0) q.push(u);
 	while (!q.empty()) {
 		ll u = q.front();
 		q.pop();
 		order.pb(u);
 		for (ll v : adj[u])
-			if (--inDegree[v] == 0) q.push(v);
+			if (--in_degree[v] == 0) q.push(v);
 	}
 	return order;
 }

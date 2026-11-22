@@ -31,11 +31,11 @@ struct SegmentTree {
 
 	// combine of a[l], ..., a[r - 1]
 	ll query(ll l, ll r) {
-		ll resLeft = neutral, resRight = neutral;
+		ll res_left = neutral, res_right = neutral;
 		for (l += n, r += n; l < r; l /= 2, r /= 2) {
-			if (l % 2 == 1) resLeft = combine(resLeft, tree[l++]);
-			if (r % 2 == 1) resRight = combine(tree[--r], resRight);
+			if (l % 2 == 1) res_left = combine(res_left, tree[l++]);
+			if (r % 2 == 1) res_right = combine(tree[--r], res_right);
 		}
-		return combine(resLeft, resRight);
+		return combine(res_left, res_right);
 	}
 };

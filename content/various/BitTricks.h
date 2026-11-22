@@ -11,16 +11,16 @@
  */
 #pragma once
 
-void bitExamples(ll x, ll i, ll m) {
-	bool isSet = x >> i & 1;
+void bit_examples(ll x, ll i, ll m) {
+	bool is_set = x >> i & 1;
 	x |= 1LL << i;              // set bit i
 	x &= ~(1LL << i);           // clear bit i
 	x ^= 1LL << i;              // toggle bit i
 	ll lowest = x & -x;         // lowest set bit (as a value)
 	ll ones = __builtin_popcountll(x);
 	ll trailing = __builtin_ctzll(x);  // x != 0
-	ll highBit = 63 - __builtin_clzll(x); // = __lg(x), x != 0
-	bool powerOfTwo = x > 0 && (x & (x - 1)) == 0;
+	ll high_bit = 63 - __builtin_clzll(x); // = __lg(x), x != 0
+	bool power_of_two = x > 0 && (x & (x - 1)) == 0;
 	// all submasks of m, including m and 0: O(3^n) over all m
 	for (ll s = m; ; s = (s - 1) & m) {
 		/* use s */
@@ -28,11 +28,11 @@ void bitExamples(ll x, ll i, ll m) {
 	}
 	// next bigger number with the same popcount (x > 0)
 	ll c = x & -x, r = x + c, next = (((r ^ x) >> 2) / c) | r;
-	(void)isSet, (void)lowest, (void)ones, (void)trailing;
-	(void)highBit, (void)powerOfTwo, (void)next;
+	(void)is_set, (void)lowest, (void)ones, (void)trailing;
+	(void)high_bit, (void)power_of_two, (void)next;
 }
 
-vi sumOverSubsets(vi a, ll n) { // a has size 2^n
+vi sum_over_subsets(vi a, ll n) { // a has size 2^n
 	fore(b, 0, n) fore(mask, 0, 1LL << n)
 		if (mask >> b & 1) a[mask] += a[mask ^ (1LL << b)];
 	return a;
@@ -40,7 +40,7 @@ vi sumOverSubsets(vi a, ll n) { // a has size 2^n
 
 const ll MAXS = 100001;
 // reachable[s] = some subset of w has sum s
-bitset<MAXS> subsetSums(vi& w) {
+bitset<MAXS> subset_sums(vi& w) {
 	bitset<MAXS> reachable;
 	reachable[0] = 1;
 	for (ll x : w) reachable |= reachable << x;

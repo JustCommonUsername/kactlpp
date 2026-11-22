@@ -30,11 +30,11 @@ ll phi(ll n) {
 	return res;
 }
 
-// phiTable[i] = phi(i) for all i < N
-vi phiSieve(ll N) {
-	vi phiTable(N);
-	iota(ALL(phiTable), 0);
-	fore(p, 2, N) if (phiTable[p] == p) // p is prime
-		for (ll j = p; j < N; j += p) phiTable[j] -= phiTable[j] / p;
-	return phiTable;
+// phi_table[i] = phi(i) for all i < N
+vi phi_sieve(ll N) {
+	vi phi_table(N);
+	iota(ALL(phi_table), 0);
+	fore(p, 2, N) if (phi_table[p] == p) // p is prime
+		for (ll j = p; j < N; j += p) phi_table[j] -= phi_table[j] / p;
+	return phi_table;
 }

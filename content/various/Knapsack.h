@@ -21,7 +21,7 @@ ll knapsack01(vi& weight, vi& value, ll W) {
 	return best[W];
 }
 
-ll knapsackUnbounded(vi& weight, vi& value, ll W) {
+ll knapsack_unbounded(vi& weight, vi& value, ll W) {
 	vi best(W + 1, 0);
 	fore(i, 0, SZ(weight))
 		fore(c, weight[i], W + 1)

@@ -12,9 +12,9 @@
 struct UnionFind {
 	// parent[u] = parent of u, a root is its own parent
 	// size[r] = number of nodes in the set of root r
-	ll numSets;
+	ll num_sets;
 	vi parent, size;
-	UnionFind(ll N) : numSets(N), parent(N), size(N, 1) {
+	UnionFind(ll N) : num_sets(N), parent(N), size(N, 1) {
 		iota(parent.begin(), parent.end(), 0);
 	}
 
@@ -30,10 +30,10 @@ struct UnionFind {
 		if (size[a] < size[b]) swap(a, b);
 		parent[b] = a;
 		size[a] += size[b];
-		numSets--;
+		num_sets--;
 		return true;
 	}
 
 	bool connected(ll a, ll b) { return root(a) == root(b); }
-	ll setSize(ll u) { return size[root(u)]; }
+	ll set_size(ll u) { return size[root(u)]; }
 };

@@ -13,7 +13,7 @@
  */
 #pragma once
 
-void pairExamples() {
+void pair_examples() {
 	vector<ii> v = {{3, 1}, {1, 5}, {3, 0}, {2, 2}};
 
 	// ---- sorting ----
@@ -35,7 +35,7 @@ void pairExamples() {
 	auto it1 = lower_bound(ALL(v), ii(x, LLONG_MIN));
 	// first element with .fst > x
 	auto it2 = upper_bound(ALL(v), ii(x, LLONG_MAX));
-	ll countX = it2 - it1;                         // elements with .fst == x
+	ll count_x = it2 - it1;                         // elements with .fst == x
 	// search by .snd only (v sorted by .snd): custom compare
 	auto it3 = lower_bound(ALL(v), x,
 		[](const ii& p, ll val) { return p.snd < val; });
@@ -68,15 +68,15 @@ void pairExamples() {
 	seen[{3, 4}] = 1;
 
 	// ---- priority_queue with pairs ----
-	priority_queue<ii> maxHeap;                    // largest .fst on top
-	priority_queue<ii, vector<ii>, greater<ii>> minHeap; // smallest on top
-	minHeap.push({5, 1}), minHeap.push({2, 9});
-	auto [d, node] = minHeap.top();                // (2, 9), Dijkstra style
-	maxHeap.push({-d, node});                      // or: negate for min-heap
+	priority_queue<ii> max_heap;                    // largest .fst on top
+	priority_queue<ii, vector<ii>, greater<ii>> min_heap; // smallest on top
+	min_heap.push({5, 1}), min_heap.push({2, 9});
+	auto [d, node] = min_heap.top();                // (2, 9), Dijkstra style
+	max_heap.push({-d, node});                      // or: negate for min-heap
 
 	// lambda comparator: smallest .snd on top
-	auto bySecond = [](const ii& a, const ii& b) { return a.snd > b.snd; };
-	priority_queue<ii, vector<ii>, decltype(bySecond)> pq(bySecond);
+	auto by_second = [](const ii& a, const ii& b) { return a.snd > b.snd; };
+	priority_queue<ii, vector<ii>, decltype(by_second)> pq(by_second);
 	pq.push({1, 7}), pq.push({2, 3});              // top = (2, 3)
 
 	// struct comparator (usable as a type, e.g. in a global)
@@ -86,7 +86,7 @@ void pairExamples() {
 	priority_queue<ii, vector<ii>, LargestSecond> pq2; // top = largest .snd
 
 	// set with a custom order (no two "equal" elements allowed!)
-	set<ii, LargestSecond> byValue;
+	set<ii, LargestSecond> by_value;
 
 	// ---- other algorithms on pairs ----
 	auto mn = *min_element(ALL(v), [](const ii& a, const ii& b) {
@@ -94,7 +94,7 @@ void pairExamples() {
 	});
 	bool found = binary_search(ALL(v), ii(2, 2));  // exact pair, v sorted
 	auto [lo, hi] = equal_range(ALL(v), ii(3, 0)); // range of equal pairs
-	(void)countX, (void)it3, (void)nxt, (void)mn, (void)found, (void)lo, (void)hi;
+	(void)count_x, (void)it3, (void)nxt, (void)mn, (void)found, (void)lo, (void)hi;
 }
 
 // own struct in sort / set / priority_queue: define operator<

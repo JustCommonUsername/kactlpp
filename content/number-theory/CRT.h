@@ -17,7 +17,7 @@
 ll crt(ll a, ll m, ll b, ll n) {
 	a = (a % m + m) % m, b = (b % n + n) % n;
 	ll p, q;
-	ll g = extGcd(m, n, p, q); // m*p + n*q = g
+	ll g = ext_gcd(m, n, p, q); // m*p + n*q = g
 	if ((b - a) % g != 0) return -1;
 	ll lcm = m / g * n;
 	// x = a + m * t  with  m * t = b - a (mod n)

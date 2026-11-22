@@ -3,39 +3,39 @@
  * Date: 2026-11-17
  * License: CC0
  * Source: folklore
- * Description: Trie over lowercase letters. \texttt{countEnd[v]} = number of
- * words ending at node v, \texttt{countPass[v]} = number of words through v
+ * Description: Trie over lowercase letters. \texttt{count\_end[v]} = number of
+ * words ending at node v, \texttt{count\_pass[v]} = number of words through v
  * (= number of words with that prefix). For max XOR of numbers, use a
  * binary trie with 2 children and insert the bits from high to low.
- * Usage: Trie t; t.insert("abc"); t.countPrefix("ab");
+ * Usage: Trie t; t.insert("abc"); t.count_prefix("ab");
  * Time: O(|word|) per operation.
  */
 #pragma once
 
 struct Trie {
 	vector<array<ll, 26>> next; // next[v][c] = child or -1
-	vi countEnd, countPass;
-	Trie() { newNode(); }
+	vi count_end, count_pass;
+	Trie() { new_node(); }
 
-	ll newNode() {
+	ll new_node() {
 		next.pb({}), next.back().fill(-1);
-		countEnd.pb(0), countPass.pb(0);
+		count_end.pb(0), count_pass.pb(0);
 		return SZ(next) - 1;
 	}
 
 	void insert(const string& word) {
 		ll v = 0;
-		countPass[v]++;
+		count_pass[v]++;
 		for (char ch : word) {
 			ll c = ch - 'a';
 			if (next[v][c] == -1) {
-				ll child = newNode(); // may reallocate next
+				ll child = new_node(); // may reallocate next
 				next[v][c] = child;
 			}
 			v = next[v][c];
-			countPass[v]++;
+			count_pass[v]++;
 		}
-		countEnd[v]++;
+		count_end[v]++;
 	}
 
 	// node of the prefix, or -1 if no word starts with it
@@ -48,6 +48,6 @@ struct Trie {
 		return v;
 	}
 
-	ll countPrefix(const string& p) { ll v = find(p); return v < 0 ? 0 : countPass[v]; }
-	ll countWord(const string& w) { ll v = find(w); return v < 0 ? 0 : countEnd[v]; }
+	ll count_prefix(const string& p) { ll v = find(p); return v < 0 ? 0 : count_pass[v]; }
+	ll count_word(const string& w) { ll v = find(w); return v < 0 ? 0 : count_end[v]; }
 };

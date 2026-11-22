@@ -12,7 +12,7 @@
  */
 #pragma once
 
-ll mergePiles(vi& a) {
+ll merge_piles(vi& a) {
 	ll n = SZ(a);
 	vi pre(n + 1, 0);
 	fore(i, 0, n) pre[i + 1] = pre[i] + a[i];

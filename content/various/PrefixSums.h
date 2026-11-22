@@ -26,7 +26,7 @@ struct Prefix2D {
 	}
 };
 
-ll longestWindow(vi& a, ll S) {
+ll longest_window(vi& a, ll S) {
 	ll best = 0, sum = 0, l = 0;
 	fore(r, 0, SZ(a)) {
 		sum += a[r]; // window is a[l..r]

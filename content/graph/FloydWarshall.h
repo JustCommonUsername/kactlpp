@@ -13,7 +13,7 @@
 
 const ll INF = LLONG_MAX / 4;
 
-void floydWarshall(vector<vi>& dist) {
+void floyd_warshall(vector<vi>& dist) {
 	ll n = SZ(dist);
 	fore(i, 0, n) dist[i][i] = min(dist[i][i], 0LL);
 	// k = intermediate node that paths may now use

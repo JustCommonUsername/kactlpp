@@ -11,7 +11,7 @@
  */
 #pragma once
 
-ll editDistance(const string& a, const string& b) {
+ll edit_distance(const string& a, const string& b) {
 	ll n = SZ(a), m = SZ(b);
 	vector<vi> dp(n + 1, vi(m + 1));
 	fore(i, 0, n + 1) dp[i][0] = i; // delete everything

@@ -5,7 +5,7 @@
  * Source: hacked from the GNU pb_ds documentation
  * Description: A \texttt{set} that can also find the $k$-th smallest
  * element and the number of elements smaller than a value.
- * Not a multiset! For duplicates store \texttt{pair(value, uniqueId)}.
+ * Not a multiset! For duplicates store \texttt{pair(value, unique\_id)}.
  * Time: O(\log N)
  */
 #pragma once

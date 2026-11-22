@@ -36,14 +36,14 @@ struct LCA {
 	}
 
 	// ancestor of u that is k levels higher
-	ll kthAncestor(ll u, ll k) {
+	ll kth_ancestor(ll u, ll k) {
 		fore(i, 0, LOG) if (k >> i & 1) u = up[i][u];
 		return u;
 	}
 
 	ll query(ll a, ll b) {
 		if (depth[a] < depth[b]) swap(a, b);
-		a = kthAncestor(a, depth[a] - depth[b]);
+		a = kth_ancestor(a, depth[a] - depth[b]);
 		if (a == b) return a;
 		// jump both up as long as they stay different
 		for (ll k = LOG - 1; k >= 0; k--)

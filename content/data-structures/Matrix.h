@@ -12,14 +12,21 @@
  */
 #pragma once
 
-template<class T, int N> struct Matrix {
-	typedef Matrix M;
-	array<array<T, N>, N> d{};
-	M operator*(const M& m) const {
-		M a;
-		rep(i,0,N) rep(j,0,N)
-			rep(k,0,N) a.d[i][k] += d[i][j] * m.d[j][k];
-		return a;
+#include "../number-theory/ModularArithmetic.h" // only for MOD
+
+struct Matrix {
+	ll n;
+	vector<vi> d;
+	Matrix(ll size) : n(size), d(size, vi(size, 0)) {}
+
+	Matrix operator*(const Matrix& other) const {
+		Matrix res(n);
+		// i-k-j loop order: the inner loop walks rows, cache friendly
+		fore(i, 0, n) fore(k, 0, n) {
+			if (d[i][k] == 0) continue;
+			fore(j, 0, n) res.d[i][j] = (res.d[i][j] + d[i][k] * other.d[k][j]) % MOD;
+		}
+		return res;
 	}
 
 	// this^p by repeated squaring
