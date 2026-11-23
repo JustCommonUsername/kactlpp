@@ -9,7 +9,10 @@
  * Difference array: add x to \texttt{a[l..r-1]} with \texttt{diff[l] += x,
  * diff[r] -= x}, then a = prefix sums of diff.
  * Two pointers: longest window with sum $\le$ S (needs $a_i \ge 0$).
- * Time: O(N) build, O(1) per query.
+ * Grid rotation (in place, square only; for char grids use
+ * \texttt{vector<string>}): cell (i, j) goes to (j, n-1-i) clockwise and
+ * to (n-1-j, i) counterclockwise; 180 degrees = rotate\_cw twice.
+ * Time: O(N) build, O(1) per query, $O(N^2)$ per rotation.
  */
 #pragma once
 
@@ -34,4 +37,27 @@ ll longest_window(vi& a, ll S) {
 		best = max(best, r - l + 1);
 	}
 	return best;
+}
+
+void transpose(vector<vi>& matrix) { // mirror on diagonal
+	ll n = SZ(matrix);
+	fore(i, 0, n) fore(j, 0, i) swap(matrix[i][j], matrix[j][i]);
+}
+
+void flip_rows(vector<vi>& matrix) { // mirror left <-> right
+	for (auto& row : matrix) reverse(ALL(row));
+}
+
+void flip_cols(vector<vi>& matrix) { // mirror top <-> bottom
+	reverse(ALL(matrix));
+}
+
+void rotate_cw(vector<vi>& matrix) { // clockwise
+	transpose(matrix);
+	flip_rows(matrix);
+}
+
+void rotate_ccw(vector<vi>& matrix) { // counterclockwise
+	transpose(matrix);
+	flip_cols(matrix);
 }
