@@ -5,7 +5,7 @@
  * Source: me
  * Description: Given the polygon as a set of adjacent points (ordered clockwise or counter-clockwise)
  *  with integer coordinates, compute it's lattice points (points with integer coordinates inside and on it's boundary).
- *  Uses Pick's theorem and polygon area.
+ *  Uses Pick's theorem and polygon area. Returns a pair of numbers: boundary points and points inside.
  * Usage:
  *  typedef Point<ll> p;
  *  vector<P> v = {p1, p2, ...} // adjacent
@@ -31,8 +31,8 @@ ll boundary(const vector<Point<T>>& v) {
     return res;
 }
 
-ll lattice_points(const vector<Point<T>>& v) {
+pair<ll, ll> lattice_points(const vector<Point<T>>& v) {
     ll area = abs(polygonArea2<ll>(v));
     ll b = boundary(v);
-    return area / 2 - b / 2 + 1;
+    return {b, area / 2 - b / 2 + 1};
 }
