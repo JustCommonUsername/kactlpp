@@ -5,8 +5,11 @@
 # License: CC0
 
 import sys
+import os
+import glob
 import getopt
 import subprocess
+import tempfile
 import snippets
 
 instream = sys.stdin
@@ -60,6 +63,39 @@ COMMENT_TYPES = [
     ("'''", "'''"),
     ('"""', '"""'),
 ]
+
+def is_gnu_cpp(cmd: str) -> bool:
+    try:
+        out = subprocess.run([cmd, '--version'], capture_output=True, text=True).stdout
+    except OSError:
+        return False
+    return 'Free Software Foundation' in out
+
+def hash_env() -> dict[str, str]:
+    """hash.sh needs GNU cpp (-fpreprocessed). On macOS `cpp` is clang, so put
+    a wrapper named `cpp` that runs a versioned GNU one (e.g. Homebrew's
+    cpp-16) first on PATH. Without GNU cpp every hash would silently be the
+    hash of an empty file."""
+    env = dict(os.environ)
+    if is_gnu_cpp('cpp'):
+        return env
+    candidates = [c for d in env.get('PATH', '').split(os.pathsep)
+                  for c in glob.glob(os.path.join(d, 'cpp-[0-9]*'))]
+    candidates.sort(key=lambda c: int(c.rsplit('-', 1)[1]) if c.rsplit('-', 1)[1].isdigit() else 0,
+                    reverse=True)
+    for c in candidates:
+        if is_gnu_cpp(c):
+            shim = os.path.join(tempfile.gettempdir(), 'kactl-gnu-cpp')
+            os.makedirs(shim, exist_ok=True)
+            wrapper = os.path.join(shim, 'cpp')
+            with open(wrapper, 'w') as f:
+                f.write(f'#!/bin/sh\nexec "{c}" "$@"\n')
+            os.chmod(wrapper, 0o755)
+            env['PATH'] = shim + os.pathsep + env.get('PATH', '')
+            return env
+    print("preprocessor.py: no GNU cpp found (install gcc); hashes will be wrong",
+          file=sys.stderr)
+    return env
 
 def find_start_comment(source: str, start: int | None = None) -> tuple[int, int, str]:
     first = (-1, -1, "")
@@ -157,7 +193,7 @@ def processwithcomments(caption: str, listingslang: str, make_snippets: bool = F
 
     if listingslang in ['C++', 'Java']:
         hash_script = 'hash'
-        p = subprocess.Popen(['sh', f'content/contest/{hash_script}.sh'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, encoding="utf-8")
+        p = subprocess.Popen(['sh', f'content/contest/{hash_script}.sh'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, encoding="utf-8", env=hash_env())
         hsh, _ = p.communicate(nsource)
         hsh = hsh.split(None, 1)[0]
         hsh = f"{hsh}, "
